@@ -148,35 +148,45 @@ st.dataframe(tabla_resultados, use_container_width=True)
 # -------------------------
 st.subheader("Clasificación TAS")
 
+from PIL import Image, ImageFile
+
 df["Alkalis"] = df["Na2O"] + df["K2O"]
 
 ruta_imagen = "Diagrama tas.png"
-imagen_fondo = mpimg.imread(ruta_imagen)
 
-fig, ax = plt.subplots(figsize=(10, 8), dpi=150)
+try:
+    ImageFile.LOAD_TRUNCATED_IMAGES = True
 
-limites_imagen = [35, 75, 0, 16]
-ax.imshow(imagen_fondo, extent=limites_imagen, aspect="auto", zorder=1)
+    imagen_fondo = Image.open(ruta_imagen).convert("RGBA")
+    imagen_fondo = np.array(imagen_fondo)
 
-sns.scatterplot(
-    data=df,
-    x="SiO2",
-    y="Alkalis",
-    hue="Location",
-    ax=ax,
-    s=100,
-    edgecolor="black",
-    linewidth=1,
-    zorder=2
-)
+    fig, ax = plt.subplots(figsize=(10, 8), dpi=150)
 
-ax.set_title("Clasificación TAS", fontsize=14, pad=15)
-ax.set_xlabel("SiO2 (wt%)", fontsize=12)
-ax.set_ylabel("Na2O + K2O (wt%)", fontsize=12)
-ax.legend(title="Isla", bbox_to_anchor=(1.05, 1), loc="upper left")
+    limites_imagen = [35, 75, 0, 16]
+    ax.imshow(imagen_fondo, extent=limites_imagen, aspect="auto", zorder=1)
 
-fig.tight_layout()
-st.pyplot(fig)
+    sns.scatterplot(
+        data=df,
+        x="SiO2",
+        y="Alkalis",
+        hue="Location",
+        ax=ax,
+        s=100,
+        edgecolor="black",
+        linewidth=1,
+        zorder=2
+    )
+
+    ax.set_title("Clasificación TAS", fontsize=14, pad=15)
+    ax.set_xlabel("SiO2 (wt%)", fontsize=12)
+    ax.set_ylabel("Na2O + K2O (wt%)", fontsize=12)
+    ax.legend(title="Isla", bbox_to_anchor=(1.05, 1), loc="upper left")
+
+    fig.tight_layout()
+    st.pyplot(fig)
+
+except Exception as e:
+    st.error(f"No se pudo cargar la imagen TAS: {e}")
 
 # -------------------------
 # 6. K-means
