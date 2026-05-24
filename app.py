@@ -383,68 +383,82 @@ if not df_fusion.empty:
 # -------------------------
 # 8. TAS + Fusión Parcial con línea alcalina
 # -------------------------
-df_tas = df.dropna(subset=['SiO2', 'Na2O', 'K2O', 'La', 'Sample', 'Location']).copy()
+import pandas as pd
+import plotly.express as px
+import plotly.graph_objects as go
+import numpy as np
 
-if not df_tas.empty:
-    df_tas['Alkalis'] = df_tas['Na2O'] + df_tas['K2O']
+df = pd.read_excel(ruta)
 
-    C0_La = 0.687
-    D_La = 0.01
+# Filtramos SOLO las filas que tengan los 4 datos necesarios
+df_tas = df.dropna(subset=['SiO2', 'Na2O', 'K2O', 'La']).copy()
 
-    df_tas['F_fraccion'] = (C0_La / df_tas['La'] - D_La) / (1 - D_La)
-    df_tas['F_porcentaje'] = df_tas['F_fraccion'] * 100
-    df_tas['F_porcentaje'] = df_tas['F_porcentaje'].clip(lower=0.1, upper=25)
+# 2. CÁLCULOS GEOQUÍMICOS
+df_tas['Alkalis'] = df_tas['Na2O'] + df_tas['K2O']
 
-    fig = px.scatter(
-        df_tas,
-        x='SiO2',
-        y='Alkalis',
-        color='F_porcentaje',
-        color_continuous_scale='Plasma_r',
-        hover_name='Sample',
-        hover_data=['Location', 'La'],
-        title='Grado de Fusión Parcial',
-        labels={
-            'SiO2': 'Sílice (SiO2 %)',
-            'Alkalis': 'Álcalis Totales (Na2O + K2O %)',
-            'F_porcentaje': '% Fusión Parcial'
-        },
-        template='plotly_white'
+C0_La = 0.687
+D_La = 0.01
+df_tas['F_fraccion'] = (C0_La / df_tas['La'] - D_La) / (1 - D_La)
+df_tas['F_porcentaje'] = df_tas['F_fraccion'] * 100
+df_tas['F_porcentaje'] = df_tas['F_porcentaje'].clip(lower=0.1, upper=25)
+
+# 3. GRÁFICO INTERACTIVO TAS + FUSIÓN
+fig = px.scatter(
+    df_tas,
+    x='SiO2',
+    y='Alkalis',
+    color='F_porcentaje',
+    color_continuous_scale='Plasma_r',
+    hover_name='Sample',
+    hover_data=['Location', 'La'],
+    title='Grado de Fusión Parcial',
+    labels={
+        'SiO2': 'Sílice (SiO2 %)',
+        'Alkalis': 'Álcalis Totales (Na2O + K2O %)',
+        'F_porcentaje': '% Fusión Parcial'
+    },
+    template='plotly_white'
+)
+
+# 4. LÍNEA DIVISORIA ALCALINA / SUBALCALINA INTERACTIVA
+x_linea = np.linspace(43, 54, 300)
+y_linea = (0.37 * x_linea) - 14.43
+
+fig.add_trace(go.Scatter(
+    x=x_linea,
+    y=y_linea,
+    mode='lines',
+    name='Límite alcalino',
+    line=dict(color='#00B5D8', width=4, dash='dash'),
+    hovertemplate=(
+        '<b>Límite alcalino</b><br>'
+        'SiO2: %{x:.2f}%<br>'
+        'Na2O + K2O: %{y:.2f}%<extra></extra>'
     )
+))
 
-    x_linea = np.linspace(40, 60, 200)
-    y_linea = (0.37 * x_linea) - 14.43
+# 5. AJUSTES FINALES
+fig.update_traces(
+    marker=dict(size=12, line=dict(width=1, color='black')),
+    selector=dict(mode='markers')
+)
 
-    fig.add_trace(go.Scatter(
-        x=x_linea,
-        y=y_linea,
-        mode='lines',
-        name='Línea alcalina',
-        line=dict(color='black', width=3, dash='dash'),
-        hoverinfo='skip',
-        showlegend=True
-    ))
-
-    fig.update_traces(
-        marker=dict(
-            size=12,
-            line=dict(width=1, color='black')
-        ),
-        selector=dict(mode='markers')
+fig.update_layout(
+    xaxis_range=[43, 54],
+    yaxis_range=[0.5, 7],
+    coloraxis_colorbar=dict(title='Fusión (%)'),
+    legend=dict(
+        title='Trazas',
+        x=0.01,
+        y=0.99,
+        bgcolor='rgba(255,255,255,0.7)'
     )
+)
 
-    fig.update_layout(
-        xaxis_range=[40, 60],
-        yaxis_range=[0, 8],
-        coloraxis_colorbar=dict(title="Fusión (%)"),
-        width=950,
-        height=600
-    )
+fig.update_xaxes(showgrid=True, gridcolor='lightgray')
+fig.update_yaxes(showgrid=True, gridcolor='lightgray')
 
-    st.plotly_chart(fig, use_container_width=True)
-else:
-    st.warning("No hay datos suficientes para TAS + Fusión Parcial.")
-
+fig.show()
 # -------------------------
 # 9. TAS y Evolución Magmática
 # -------------------------
