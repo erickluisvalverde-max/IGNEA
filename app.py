@@ -4,8 +4,8 @@ import numpy as np
 import pandas as pd
 import streamlit as st
 import matplotlib.pyplot as plt
-import matplotlib.image as mpimg
 import seaborn as sns
+import matplotlib.image as mpimg
 import plotly.express as px
 import plotly.graph_objects as go
 from PIL import Image
@@ -98,8 +98,13 @@ st.plotly_chart(fig, use_container_width=True)
 # -------------------------
 # 3. Sr vs Nd con imagen de fondo
 # -------------------------
-ruta_imagen_srnd = "SRvsND.png"
-imagen_fondo = mpimg.imread(ruta_imagen_srnd)
+st.subheader("Diagrama Sr vs Nd con fondo")
+
+ruta_imagen_srnd = None
+for posible_ruta in ["SRvsND.png", "./SRvsND.png"]:
+    if os.path.exists(posible_ruta):
+        ruta_imagen_srnd = posible_ruta
+        break
 
 fig, ax = plt.subplots(figsize=(9, 10), dpi=150)
 plt.style.use('default')
@@ -107,7 +112,11 @@ ax.set_facecolor('white')
 
 limites_grafico = [0.703, 0.711, 0.5120, 0.5132]
 
-ax.imshow(imagen_fondo, extent=limites_grafico, aspect='auto', zorder=1)
+if ruta_imagen_srnd is not None:
+    imagen_fondo = mpimg.imread(ruta_imagen_srnd)
+    ax.imshow(imagen_fondo, extent=limites_grafico, aspect='auto', zorder=1)
+else:
+    st.error("No se encontró la imagen SRvsND.png en la carpeta del proyecto.")
 
 sns.scatterplot(
     data=df,
@@ -342,7 +351,7 @@ fig.update_traces(
 st.plotly_chart(fig, use_container_width=True)
 
 # -------------------------
-# 7. Cálculo de Fusión Parcial (Batch Melting)
+# 7. Cálculo de Fusión Parcial
 # -------------------------
 C0_La = 0.687
 D_La = 0.01
