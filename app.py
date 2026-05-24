@@ -45,133 +45,143 @@ st.dataframe(df.head(), use_container_width=True)
 # -------------------------
 st.subheader("Diagrama Sr vs Nd")
 
-sns.set_theme(style="whitegrid")
-fig, ax = plt.subplots(figsize=(10, 6))
+if {'Sr87_Sr86', 'Nd143_Nd144', 'Location'}.issubset(df.columns):
+    sns.set_theme(style="whitegrid")
+    fig, ax = plt.subplots(figsize=(10, 6))
 
-sns.scatterplot(
-    data=df,
-    x="Sr87_Sr86",
-    y="Nd143_Nd144",
-    hue="Location",
-    palette="tab10",
-    s=100,
-    edgecolor="black",
-    ax=ax
-)
+    sns.scatterplot(
+        data=df.dropna(subset=['Sr87_Sr86', 'Nd143_Nd144', 'Location']),
+        x="Sr87_Sr86",
+        y="Nd143_Nd144",
+        hue="Location",
+        palette="tab10",
+        s=100,
+        edgecolor="black",
+        ax=ax
+    )
 
-ax.set_title("Sr vs Nd", fontsize=14, fontweight="bold")
-ax.set_xlabel("87Sr / 86Sr", fontsize=12)
-ax.set_ylabel("143Nd / 144Nd", fontsize=12)
-ax.legend(bbox_to_anchor=(1.05, 1), loc="upper left")
+    ax.set_title("Sr vs Nd", fontsize=14, fontweight="bold")
+    ax.set_xlabel("87Sr / 86Sr", fontsize=12)
+    ax.set_ylabel("143Nd / 144Nd", fontsize=12)
+    ax.legend(bbox_to_anchor=(1.05, 1), loc="upper left")
 
-fig.tight_layout()
-st.pyplot(fig)
+    fig.tight_layout()
+    st.pyplot(fig)
+else:
+    st.warning("Faltan columnas para el diagrama Sr vs Nd.")
 
 # -------------------------
 # 2. Sr vs Nd interactivo (Plotly)
 # -------------------------
-fig = px.scatter(
-    df,
-    x='Sr87_Sr86',
-    y='Nd143_Nd144',
-    color='Location',
-    hover_name='Sample',
-    hover_data=['SiO2', 'MgO', 'La', 'Yb'],
-    title='Sr vs Nd',
-    labels={
-        'Sr87_Sr86': 'Isótopo 87Sr / 86Sr',
-        'Nd143_Nd144': 'Isótopo 143Nd / 144Nd',
-        'Location': 'Isla / Localidad'
-    },
-    template='plotly_white'
-)
-
-fig.update_traces(
-    marker=dict(
-        size=10,
-        line=dict(width=1, color='DarkSlateGrey')
-    )
-)
-
-st.plotly_chart(fig, use_container_width=True)
-
-# -------------------------
-# 3. Sr vs Nd con imagen de fondo
-# -------------------------
-st.subheader("Diagrama Sr vs Nd con fondo")
-
-ruta_imagen_srnd = "SRvsND.png.png"
-imagen_fondo = mpimg.imread(ruta_imagen_srnd)
-
-fig, ax = plt.subplots(figsize=(9, 10), dpi=150)
-plt.style.use('default')
-ax.set_facecolor('white')
-
-limites_grafico = [0.703, 0.711, 0.5120, 0.5132]
-ax.imshow(imagen_fondo, extent=limites_grafico, aspect='auto', zorder=1)
-
-sns.scatterplot(
-    data=df,
-    x='Sr87_Sr86',
-    y='Nd143_Nd144',
-    hue='Location',
-    ax=ax,
-    s=110,
-    edgecolor='black',
-    linewidth=0.8,
-    alpha=0.9,
-    zorder=2
-)
-
-ax.set_title('Diagrama Sr vs Nd', fontsize=13, pad=15)
-ax.set_xlabel('$^{87}$Sr / $^{86}$Sr', fontsize=12, fontweight='bold')
-ax.set_ylabel('$^{143}$Nd / $^{144}$Nd', fontsize=12, fontweight='bold')
-ax.set_xlim(0.703, 0.711)
-ax.set_ylim(0.5120, 0.5132)
-ax.tick_params(direction='in', top=True, right=True, labelsize=10)
-ax.legend(title='Isla / Localidad', bbox_to_anchor=(1.05, 1), loc='upper left', fontsize=10)
-
-plt.tight_layout()
-st.pyplot(fig)
-
-# -------------------------
-# 4. La/Sm vs Sm/Yb (Plotly)
-# -------------------------
-df_ree = df.dropna(subset=['La', 'Sm', 'Yb']).copy()
-
-if not df_ree.empty:
-    df_ree['La_Sm'] = df_ree['La'] / df_ree['Sm']
-    df_ree['Sm_Yb'] = df_ree['Sm'] / df_ree['Yb']
+if {'Sr87_Sr86', 'Nd143_Nd144', 'Location', 'Sample'}.issubset(df.columns):
+    hover_cols = [c for c in ['SiO2', 'MgO', 'La', 'Yb'] if c in df.columns]
 
     fig = px.scatter(
-        df_ree,
-        x='Sm_Yb',
-        y='La_Sm',
+        df.dropna(subset=['Sr87_Sr86', 'Nd143_Nd144']),
+        x='Sr87_Sr86',
+        y='Nd143_Nd144',
         color='Location',
         hover_name='Sample',
-        title='La/Sm vs Sm/Yb',
+        hover_data=hover_cols,
+        title='Sr vs Nd',
         labels={
-            'Sm_Yb': 'Sm / Yb (A mayor valor, fusión más profunda)',
-            'La_Sm': 'La / Sm (A mayor valor, fuente más enriquecida)',
-            'Location': 'Isla'
+            'Sr87_Sr86': 'Isótopo 87Sr / 86Sr',
+            'Nd143_Nd144': 'Isótopo 143Nd / 144Nd',
+            'Location': 'Isla / Localidad'
         },
         template='plotly_white'
     )
 
     fig.update_traces(
         marker=dict(
-            size=12,
-            line=dict(width=1, color='black')
-        ),
-        selector=dict(mode='markers')
+            size=10,
+            line=dict(width=1, color='DarkSlateGrey')
+        )
     )
 
     st.plotly_chart(fig, use_container_width=True)
-else:
-    st.warning("No hay datos suficientes para graficar La/Sm vs Sm/Yb.")
 
 # -------------------------
-# 5. OIB y MORB (Plotly)
+# 3. Sr vs Nd con imagen de fondo
+# -------------------------
+st.subheader("Diagrama Sr vs Nd con fondo")
+
+if {'Sr87_Sr86', 'Nd143_Nd144', 'Location'}.issubset(df.columns):
+    ruta_imagen_srnd = "SRvsND.png.png"
+
+    if os.path.exists(ruta_imagen_srnd):
+        imagen_fondo = mpimg.imread(ruta_imagen_srnd)
+
+        fig, ax = plt.subplots(figsize=(9, 10), dpi=150)
+        plt.style.use('default')
+        ax.set_facecolor('white')
+
+        limites_grafico = [0.703, 0.711, 0.5120, 0.5132]
+        ax.imshow(imagen_fondo, extent=limites_grafico, aspect='auto', zorder=1)
+
+        sns.scatterplot(
+            data=df.dropna(subset=['Sr87_Sr86', 'Nd143_Nd144', 'Location']),
+            x='Sr87_Sr86',
+            y='Nd143_Nd144',
+            hue='Location',
+            ax=ax,
+            s=110,
+            edgecolor='black',
+            linewidth=0.8,
+            alpha=0.9,
+            zorder=2
+        )
+
+        ax.set_title('Diagrama Sr vs Nd', fontsize=13, pad=15)
+        ax.set_xlabel('$^{87}$Sr / $^{86}$Sr', fontsize=12, fontweight='bold')
+        ax.set_ylabel('$^{143}$Nd / $^{144}$Nd', fontsize=12, fontweight='bold')
+        ax.set_xlim(0.703, 0.711)
+        ax.set_ylim(0.5120, 0.5132)
+        ax.tick_params(direction='in', top=True, right=True, labelsize=10)
+        ax.legend(title='Isla / Localidad', bbox_to_anchor=(1.05, 1), loc='upper left', fontsize=10)
+
+        plt.tight_layout()
+        st.pyplot(fig)
+    else:
+        st.warning("No se encontró la imagen SRvsND.png.png.")
+
+# -------------------------
+# 4. La/Sm vs Sm/Yb (Plotly)
+# -------------------------
+if {'La', 'Sm', 'Yb', 'Location', 'Sample'}.issubset(df.columns):
+    df_ree = df.dropna(subset=['La', 'Sm', 'Yb']).copy()
+
+    if not df_ree.empty:
+        df_ree['La_Sm'] = df_ree['La'] / df_ree['Sm']
+        df_ree['Sm_Yb'] = df_ree['Sm'] / df_ree['Yb']
+
+        fig = px.scatter(
+            df_ree,
+            x='Sm_Yb',
+            y='La_Sm',
+            color='Location',
+            hover_name='Sample',
+            title='La/Sm vs Sm/Yb',
+            labels={
+                'Sm_Yb': 'Sm / Yb',
+                'La_Sm': 'La / Sm',
+                'Location': 'Isla'
+            },
+            template='plotly_white'
+        )
+
+        fig.update_traces(
+            marker=dict(
+                size=12,
+                line=dict(width=1, color='black')
+            ),
+            selector=dict(mode='markers')
+        )
+
+        st.plotly_chart(fig, use_container_width=True)
+
+# -------------------------
+# 5. OIB y MORB
 # -------------------------
 nombre_columna_localidad = 'Location'
 nombre_columna_muestra = 'Sample'
@@ -195,387 +205,364 @@ morb_ref = {
 }
 
 elementos_ree = list(condrito.keys())
-df_spider = df.copy()
 
-for col in elementos_ree:
-    if col in df_spider.columns:
-        df_spider[col] = pd.to_numeric(df_spider[col], errors='coerce')
-        df_spider[col] = df_spider[col].replace(0, np.nan)
+if nombre_columna_localidad in df.columns and nombre_columna_muestra in df.columns:
+    df_spider = df.copy()
 
-for elemento in elementos_ree:
-    if elemento in df_spider.columns:
+    for col in elementos_ree:
+        if col in df_spider.columns:
+            df_spider[col] = pd.to_numeric(df_spider[col], errors='coerce')
+            df_spider[col] = df_spider[col].replace(0, np.nan)
+
+    ree_disponibles = [e for e in elementos_ree if e in df_spider.columns]
+
+    for elemento in ree_disponibles:
         df_spider[elemento] = df_spider[elemento] / condrito[elemento]
 
-ree_disponibles = [e for e in elementos_ree if e in df_spider.columns]
+    if ree_disponibles:
+        df_melted = df_spider.melt(
+            id_vars=[nombre_columna_muestra, nombre_columna_localidad],
+            value_vars=ree_disponibles,
+            var_name='Elemento',
+            value_name='Concentracion_Normalizada'
+        ).dropna(subset=['Concentracion_Normalizada'])
 
-if len(ree_disponibles) > 0:
-    df_melted = df_spider.melt(
-        id_vars=[nombre_columna_muestra, nombre_columna_localidad],
-        value_vars=ree_disponibles,
-        var_name='Elemento',
-        value_name='Concentracion_Normalizada'
-    ).dropna(subset=['Concentracion_Normalizada'])
+        fig = px.line(
+            df_melted,
+            x='Elemento',
+            y='Concentracion_Normalizada',
+            color=nombre_columna_localidad,
+            line_group=nombre_columna_muestra,
+            hover_name=nombre_columna_muestra,
+            title='OIB y MORB',
+            log_y=True,
+            markers=True
+        )
 
-    fig = px.line(
-        df_melted,
-        x='Elemento',
-        y='Concentracion_Normalizada',
-        color=nombre_columna_localidad,
-        line_group=nombre_columna_muestra,
-        hover_name=nombre_columna_muestra,
-        title='OIB y MORB',
-        log_y=True,
-        markers=True
-    )
+        fig.update_traces(
+            line=dict(width=1),
+            opacity=0.4,
+            marker=dict(size=4)
+        )
 
-    fig.update_traces(
-        line=dict(width=1),
-        opacity=0.4,
-        marker=dict(size=4)
-    )
+        oib_norm = [oib_ref[e] / condrito[e] for e in ree_disponibles]
+        morb_norm = [morb_ref[e] / condrito[e] for e in ree_disponibles]
 
-    oib_norm = [oib_ref[e] / condrito[e] for e in ree_disponibles]
-    morb_norm = [morb_ref[e] / condrito[e] for e in ree_disponibles]
+        fig.add_trace(go.Scatter(
+            x=ree_disponibles,
+            y=oib_norm,
+            mode='lines+markers',
+            name='OIB (Referencia)',
+            line=dict(color='red', width=4, dash='dash'),
+            marker=dict(size=8, color='red', symbol='diamond')
+        ))
 
-    fig.add_trace(go.Scatter(
-        x=ree_disponibles,
-        y=oib_norm,
-        mode='lines+markers',
-        name='OIB (Referencia)',
-        line=dict(color='red', width=4, dash='dash'),
-        marker=dict(size=8, color='red', symbol='diamond')
-    ))
+        fig.add_trace(go.Scatter(
+            x=ree_disponibles,
+            y=morb_norm,
+            mode='lines+markers',
+            name='N-MORB (Referencia)',
+            line=dict(color='blue', width=4, dash='dash'),
+            marker=dict(size=8, color='blue', symbol='square')
+        ))
 
-    fig.add_trace(go.Scatter(
-        x=ree_disponibles,
-        y=morb_norm,
-        mode='lines+markers',
-        name='N-MORB (Referencia)',
-        line=dict(color='blue', width=4, dash='dash'),
-        marker=dict(size=8, color='blue', symbol='square')
-    ))
+        fig.update_layout(
+            xaxis_title='Elementos de Tierras Raras (LREE -> HREE)',
+            yaxis_title='Muestra / Condrito',
+            template='plotly_white',
+            hovermode='closest',
+            width=950,
+            height=600
+        )
 
-    fig.update_layout(
-        xaxis_title='Elementos de Tierras Raras (LREE -> HREE)',
-        yaxis_title='Muestra / Condrito',
-        template='plotly_white',
-        hovermode='closest',
-        width=950,
-        height=600
-    )
-
-    st.plotly_chart(fig, use_container_width=True)
-else:
-    st.warning("No hay elementos REE suficientes para graficar OIB y MORB.")
+        st.plotly_chart(fig, use_container_width=True)
 
 # -------------------------
-# 6. TAS con % de Fusión (Plotly)
+# 6. TAS con % de Fusión
 # -------------------------
-df_fusion = df.dropna(subset=['La', 'SiO2', 'Na2O', 'K2O', 'Location', 'Sample']).copy()
+if {'SiO2', 'Na2O', 'K2O', 'La', 'Location', 'Sample'}.issubset(df.columns):
+    df_fusion = df.dropna(subset=['La', 'SiO2', 'Na2O', 'K2O', 'Location', 'Sample']).copy()
 
-if not df_fusion.empty:
-    C0_La = 0.687
-    D_La = 0.01
+    if not df_fusion.empty:
+        C0_La = 0.687
+        D_La = 0.01
 
-    df_fusion['F_fraccion'] = (C0_La / df_fusion['La'] - D_La) / (1 - D_La)
-    df_fusion['F_porcentaje'] = (df_fusion['F_fraccion'] * 100).clip(lower=0.1, upper=30)
+        df_fusion['F_fraccion'] = (C0_La / df_fusion['La'] - D_La) / (1 - D_La)
+        df_fusion['F_porcentaje'] = (df_fusion['F_fraccion'] * 100).clip(lower=0.1, upper=30)
 
-    occidental = [
-        'Isla Fernandina', 'Isla Isabela', 'Volcan Wolf', 'Volcan Darwin',
-        'Volcan Alcedo', 'Sierra Negra', 'Cerro Azul', 'Volcan Ecuador',
-        'Isla Tortuga', 'Roca Redonda'
-    ]
+        occidental = [
+            'Isla Fernandina', 'Isla Isabela', 'Volcan Wolf', 'Volcan Darwin',
+            'Volcan Alcedo', 'Sierra Negra', 'Cerro Azul', 'Volcan Ecuador',
+            'Isla Tortuga', 'Roca Redonda'
+        ]
 
-    df_fusion['Region'] = df_fusion['Location'].apply(
-        lambda x: 'Occidental (Pluma Activa)' if x in occidental else 'Central / Oriental'
-    )
+        df_fusion['Region'] = df_fusion['Location'].apply(
+            lambda x: 'Occidental (Pluma Activa)' if x in occidental else 'Central / Oriental'
+        )
 
-    df_fusion['Alkalis'] = df_fusion['Na2O'] + df_fusion['K2O']
+        df_fusion['Alkalis'] = df_fusion['Na2O'] + df_fusion['K2O']
 
-    fig = px.scatter(
-        df_fusion,
-        x='SiO2',
-        y='Alkalis',
-        color='F_porcentaje',
-        color_continuous_scale='viridis',
-        symbol='Region',
-        hover_name='Sample',
-        hover_data=['Location', 'La'],
-        title='Clasificación TAS con los % de Fusión Parcial',
-        labels={
-            'SiO2': 'SiO2 (wt%)',
-            'Alkalis': 'Na2O + K2O (wt%)',
-            'F_porcentaje': '% Fusión',
-            'Region': 'Dominio Geográfico'
-        },
-        template='plotly_white'
-    )
+        fig = px.scatter(
+            df_fusion,
+            x='SiO2',
+            y='Alkalis',
+            color='F_porcentaje',
+            color_continuous_scale='viridis',
+            symbol='Region',
+            hover_name='Sample',
+            hover_data=['Location', 'La'],
+            title='Clasificación TAS con los % de Fusión Parcial',
+            labels={
+                'SiO2': 'SiO2 (wt%)',
+                'Alkalis': 'Na2O + K2O (wt%)',
+                'F_porcentaje': '% Fusión',
+                'Region': 'Dominio Geográfico'
+            },
+            template='plotly_white'
+        )
 
-    ruta_imagen_tas = "Diagrama tas.png"
-    if os.path.exists(ruta_imagen_tas):
-        with open(ruta_imagen_tas, "rb") as image_file:
-            encoded_string = base64.b64encode(image_file.read()).decode()
+        ruta_imagen_tas = "Diagrama tas.png"
+        if os.path.exists(ruta_imagen_tas):
+            with open(ruta_imagen_tas, "rb") as image_file:
+                encoded_string = base64.b64encode(image_file.read()).decode()
 
-        img_str = f"data:image/png;base64,{encoded_string}"
+            img_str = f"data:image/png;base64,{encoded_string}"
 
-        fig.add_layout_image(
-            dict(
-                source=img_str,
-                xref="x",
-                yref="y",
-                x=35,
-                y=16,
-                sizex=40,
-                sizey=16,
-                sizing="stretch",
-                opacity=1,
-                layer="below"
+            fig.add_layout_image(
+                dict(
+                    source=img_str,
+                    xref="x",
+                    yref="y",
+                    x=35,
+                    y=16,
+                    sizex=40,
+                    sizey=16,
+                    sizing="stretch",
+                    opacity=1,
+                    layer="below"
+                )
             )
+
+        fig.update_layout(
+            xaxis_range=[35, 75],
+            yaxis_range=[0, 16],
+            template='plotly_white',
+            plot_bgcolor='rgba(0,0,0,0)',
+            coloraxis_colorbar=dict(title="Fusión (%)"),
+            width=950,
+            height=600
         )
 
-    fig.update_layout(
-        xaxis_range=[35, 75],
-        yaxis_range=[0, 16],
-        template='plotly_white',
-        plot_bgcolor='rgba(0,0,0,0)',
-        coloraxis_colorbar=dict(title="Fusión (%)"),
-        width=950,
-        height=600
-    )
-
-    fig.update_traces(
-        marker=dict(
-            size=12,
-            line=dict(width=1, color='black')
+        fig.update_traces(
+            marker=dict(
+                size=12,
+                line=dict(width=1, color='black')
+            ),
+            selector=dict(mode='markers')
         )
-    )
 
-    st.plotly_chart(fig, use_container_width=True)
-else:
-    st.warning("No hay datos suficientes para el gráfico TAS con % de fusión.")
+        st.plotly_chart(fig, use_container_width=True)
 
-# -------------------------
-# 7. Promedio de fusión parcial por isla
-# -------------------------
-if not df_fusion.empty:
-    resumen_fusion = (
-        df_fusion.groupby('Location')['F_porcentaje']
-          .mean()
-          .sort_values(ascending=False)
-          .reset_index()
-    )
+        resumen_fusion = (
+            df_fusion.groupby('Location')['F_porcentaje']
+            .mean()
+            .sort_values(ascending=False)
+            .reset_index()
+        )
 
-    resumen_fusion.rename(
-        columns={
-            'Location': 'Isla / Localidad',
-            'F_porcentaje': 'Fusión Parcial Promedio (%)'
-        },
-        inplace=True
-    )
+        resumen_fusion.rename(
+            columns={
+                'Location': 'Isla / Localidad',
+                'F_porcentaje': 'Fusión Parcial Promedio (%)'
+            },
+            inplace=True
+        )
 
-    resumen_fusion['Fusión Parcial Promedio (%)'] = (
-        resumen_fusion['Fusión Parcial Promedio (%)'].round(2)
-    )
+        resumen_fusion['Fusión Parcial Promedio (%)'] = resumen_fusion['Fusión Parcial Promedio (%)'].round(2)
 
-    st.subheader("Promedio de fusión parcial por isla")
-    st.dataframe(resumen_fusion, use_container_width=True)
+        st.subheader("Promedio de fusión parcial por isla")
+        st.dataframe(resumen_fusion, use_container_width=True)
 
 # -------------------------
-# 8. TAS + Fusión Parcial con línea alcalina
+# 7. TAS + Fusión Parcial con línea alcalina interactiva
 # -------------------------
-import pandas as pd
-import plotly.express as px
-import plotly.graph_objects as go
-import numpy as np
+if {'SiO2', 'Na2O', 'K2O', 'La', 'Sample', 'Location'}.issubset(df.columns):
+    df_tas = df.dropna(subset=['SiO2', 'Na2O', 'K2O', 'La', 'Sample', 'Location']).copy()
 
-df = pd.read_excel(ruta)
+    if not df_tas.empty:
+        df_tas['Alkalis'] = df_tas['Na2O'] + df_tas['K2O']
 
-# Filtramos SOLO las filas que tengan los 4 datos necesarios
-df_tas = df.dropna(subset=['SiO2', 'Na2O', 'K2O', 'La']).copy()
+        C0_La = 0.687
+        D_La = 0.01
+        df_tas['F_fraccion'] = (C0_La / df_tas['La'] - D_La) / (1 - D_La)
+        df_tas['F_porcentaje'] = df_tas['F_fraccion'] * 100
+        df_tas['F_porcentaje'] = df_tas['F_porcentaje'].clip(lower=0.1, upper=25)
 
-# 2. CÁLCULOS GEOQUÍMICOS
-df_tas['Alkalis'] = df_tas['Na2O'] + df_tas['K2O']
+        fig = px.scatter(
+            df_tas,
+            x='SiO2',
+            y='Alkalis',
+            color='F_porcentaje',
+            color_continuous_scale='Plasma_r',
+            hover_name='Sample',
+            hover_data=['Location', 'La'],
+            title='Grado de Fusión Parcial',
+            labels={
+                'SiO2': 'Sílice (SiO2 %)',
+                'Alkalis': 'Álcalis Totales (Na2O + K2O %)',
+                'F_porcentaje': '% Fusión Parcial'
+            },
+            template='plotly_white'
+        )
 
-C0_La = 0.687
-D_La = 0.01
-df_tas['F_fraccion'] = (C0_La / df_tas['La'] - D_La) / (1 - D_La)
-df_tas['F_porcentaje'] = df_tas['F_fraccion'] * 100
-df_tas['F_porcentaje'] = df_tas['F_porcentaje'].clip(lower=0.1, upper=25)
+        x_linea = np.linspace(43, 54, 300)
+        y_linea = (0.37 * x_linea) - 14.43
 
-# 3. GRÁFICO INTERACTIVO TAS + FUSIÓN
-fig = px.scatter(
-    df_tas,
-    x='SiO2',
-    y='Alkalis',
-    color='F_porcentaje',
-    color_continuous_scale='Plasma_r',
-    hover_name='Sample',
-    hover_data=['Location', 'La'],
-    title='Grado de Fusión Parcial',
-    labels={
-        'SiO2': 'Sílice (SiO2 %)',
-        'Alkalis': 'Álcalis Totales (Na2O + K2O %)',
-        'F_porcentaje': '% Fusión Parcial'
-    },
-    template='plotly_white'
-)
+        fig.add_trace(go.Scatter(
+            x=x_linea,
+            y=y_linea,
+            mode='lines',
+            name='Límite alcalino',
+            line=dict(color='#00C2FF', width=4, dash='dash'),
+            hovertemplate='Límite alcalino<br>SiO2: %{x:.2f}<br>Na2O + K2O: %{y:.2f}<extra></extra>'
+        ))
 
-# 4. LÍNEA DIVISORIA ALCALINA / SUBALCALINA INTERACTIVA
-x_linea = np.linspace(43, 54, 300)
-y_linea = (0.37 * x_linea) - 14.43
+        fig.update_traces(
+            marker=dict(size=12, line=dict(width=1, color='black')),
+            selector=dict(mode='markers')
+        )
 
-fig.add_trace(go.Scatter(
-    x=x_linea,
-    y=y_linea,
-    mode='lines',
-    name='Límite alcalino',
-    line=dict(color='#00B5D8', width=4, dash='dash'),
-    hovertemplate=(
-        '<b>Límite alcalino</b><br>'
-        'SiO2: %{x:.2f}%<br>'
-        'Na2O + K2O: %{y:.2f}%<extra></extra>'
-    )
-))
+        fig.update_layout(
+            xaxis_range=[43, 54],
+            yaxis_range=[0.5, 7],
+            coloraxis_colorbar=dict(title='Fusión (%)')
+        )
 
-# 5. AJUSTES FINALES
-fig.update_traces(
-    marker=dict(size=12, line=dict(width=1, color='black')),
-    selector=dict(mode='markers')
-)
+        fig.update_xaxes(showgrid=True, gridcolor='lightgray')
+        fig.update_yaxes(showgrid=True, gridcolor='lightgray')
 
-fig.update_layout(
-    xaxis_range=[43, 54],
-    yaxis_range=[0.5, 7],
-    coloraxis_colorbar=dict(title='Fusión (%)'),
-    legend=dict(
-        title='Trazas',
-        x=0.01,
-        y=0.99,
-        bgcolor='rgba(255,255,255,0.7)'
-    )
-)
+        st.plotly_chart(fig, use_container_width=True)
 
-fig.update_xaxes(showgrid=True, gridcolor='lightgray')
-fig.update_yaxes(showgrid=True, gridcolor='lightgray')
-
-fig.show()
 # -------------------------
-# 9. TAS y Evolución Magmática
+# 8. TAS y Evolución Magmática
 # -------------------------
-df_tas2 = df.dropna(subset=['SiO2', 'Na2O', 'K2O', 'Sample', 'Location']).copy()
+if {'SiO2', 'Na2O', 'K2O', 'Sample', 'Location'}.issubset(df.columns):
+    df_tas2 = df.dropna(subset=['SiO2', 'Na2O', 'K2O', 'Sample', 'Location']).copy()
 
-if not df_tas2.empty:
-    df_tas2['Alkalis'] = df_tas2['Na2O'] + df_tas2['K2O']
+    if not df_tas2.empty:
+        df_tas2['Alkalis'] = df_tas2['Na2O'] + df_tas2['K2O']
 
-    fig = px.scatter(
-        df_tas2,
-        x='SiO2',
-        y='Alkalis',
-        color='Location',
-        hover_name='Sample',
-        title='Clasificación TAS y Evolución Magmática',
-        labels={
-            'SiO2': 'SiO2 (wt%)',
-            'Alkalis': 'Na2O + K2O (wt%)',
-            'Location': 'Localidad'
-        },
-        template='plotly_white'
-    )
+        fig = px.scatter(
+            df_tas2,
+            x='SiO2',
+            y='Alkalis',
+            color='Location',
+            hover_name='Sample',
+            title='Clasificación TAS y Evolución Magmática',
+            labels={
+                'SiO2': 'SiO2 (wt%)',
+                'Alkalis': 'Na2O + K2O (wt%)',
+                'Location': 'Localidad'
+            },
+            template='plotly_white'
+        )
 
-    ruta_imagen = 'Diagrama tas.png'
-    if os.path.exists(ruta_imagen):
-        img = Image.open(ruta_imagen)
+        ruta_imagen = 'Diagrama tas.png'
+        if os.path.exists(ruta_imagen):
+            img = Image.open(ruta_imagen)
 
-        fig.add_layout_image(
-            dict(
-                source=img,
-                xref="x",
-                yref="y",
-                x=35,
-                y=16,
-                sizex=40,
-                sizey=16,
-                sizing="stretch",
-                opacity=1,
-                layer="below"
+            fig.add_layout_image(
+                dict(
+                    source=img,
+                    xref="x",
+                    yref="y",
+                    x=35,
+                    y=16,
+                    sizex=40,
+                    sizey=16,
+                    sizing="stretch",
+                    opacity=1,
+                    layer="below"
+                )
             )
+
+        fig.update_layout(
+            xaxis_range=[35, 75],
+            yaxis_range=[0, 16],
+            template='plotly_white',
+            width=900,
+            height=600
         )
 
-    fig.update_layout(
-        xaxis_range=[35, 75],
-        yaxis_range=[0, 16],
-        template='plotly_white',
-        width=900,
-        height=600
-    )
-
-    fig.update_traces(
-        marker=dict(
-            size=11,
-            line=dict(width=1, color='black')
+        fig.update_traces(
+            marker=dict(
+                size=11,
+                line=dict(width=1, color='black')
+            ),
+            selector=dict(mode='markers')
         )
-    )
 
-    st.plotly_chart(fig, use_container_width=True)
-else:
-    st.warning("No hay datos suficientes para TAS y Evolución Magmática.")
+        st.plotly_chart(fig, use_container_width=True)
 
 # -------------------------
-# 10. Clustering K-Means
+# 9. Clustering K-Means
 # -------------------------
 columnas_ml = ['Sr87_Sr86', 'Nd143_Nd144', 'La', 'Sm', 'Yb']
-df_ml = df.dropna(subset=columnas_ml).copy()
 
-if len(df_ml) >= 3:
-    X = df_ml[columnas_ml]
-    scaler = StandardScaler()
-    X_escalado = scaler.fit_transform(X)
+if set(columnas_ml).issubset(df.columns):
+    df_ml = df.dropna(subset=columnas_ml).copy()
 
-    kmeans = KMeans(
-        n_clusters=3,
-        random_state=42,
-        n_init=10
-    )
+    if len(df_ml) >= 3:
+        X = df_ml[columnas_ml]
+        scaler = StandardScaler()
+        X_escalado = scaler.fit_transform(X)
 
-    df_ml['Cluster_IA'] = kmeans.fit_predict(X_escalado)
-    df_ml['Cluster_IA'] = 'Grupo Químico ' + df_ml['Cluster_IA'].astype(str)
-
-    nombres_geologicos = {
-        'Grupo Químico 0': 'OIB',
-        'Grupo Químico 1': 'MORB',
-        'Grupo Químico 2': 'Zona de Transición'
-    }
-
-    df_ml['Interpretacion_Geologica'] = df_ml['Cluster_IA'].map(nombres_geologicos)
-
-    fig = px.scatter(
-        df_ml,
-        x='Sr87_Sr86',
-        y='Nd143_Nd144',
-        color='Interpretacion_Geologica',
-        hover_name='Sample',
-        hover_data=['Location'],
-        title='Fuente Mantélica',
-        labels={
-            'Sr87_Sr86': '87Sr / 86Sr',
-            'Nd143_Nd144': '143Nd / 144Nd',
-            'Interpretacion_Geologica': 'Dominio del Manto'
-        },
-        template='plotly_white',
-        color_discrete_map={
-            'OIB': 'red',
-            'MORB': 'blue',
-            'Zona de Transición': 'orange'
-        }
-    )
-
-    fig.update_traces(
-        marker=dict(
-            size=14,
-            line=dict(width=1, color='black')
+        kmeans = KMeans(
+            n_clusters=3,
+            random_state=42,
+            n_init=10
         )
-    )
 
-    st.plotly_chart(fig, use_container_width=True)
-else:
-    st.warning("No hay suficientes muestras para ejecutar K-Means con 3 clústeres.")
+        df_ml['Cluster_IA'] = kmeans.fit_predict(X_escalado)
+        df_ml['Cluster_IA'] = 'Grupo Químico ' + df_ml['Cluster_IA'].astype(str)
+
+        nombres_geologicos = {
+            'Grupo Químico 0': 'OIB',
+            'Grupo Químico 1': 'MORB',
+            'Grupo Químico 2': 'Zona de Transición'
+        }
+
+        df_ml['Interpretacion_Geologica'] = df_ml['Cluster_IA'].map(nombres_geologicos)
+
+        fig = px.scatter(
+            df_ml,
+            x='Sr87_Sr86',
+            y='Nd143_Nd144',
+            color='Interpretacion_Geologica',
+            hover_name='Sample',
+            hover_data=['Location'],
+            title='Fuente Mantélica',
+            labels={
+                'Sr87_Sr86': '87Sr / 86Sr',
+                'Nd143_Nd144': '143Nd / 144Nd',
+                'Interpretacion_Geologica': 'Dominio del Manto'
+            },
+            template='plotly_white',
+            color_discrete_map={
+                'OIB': 'red',
+                'MORB': 'blue',
+                'Zona de Transición': 'orange'
+            }
+        )
+
+        fig.update_traces(
+            marker=dict(
+                size=14,
+                line=dict(width=1, color='black')
+            ),
+            selector=dict(mode='markers')
+        )
+
+        st.plotly_chart(fig, use_container_width=True)
+    else:
+        st.warning("No hay suficientes muestras para ejecutar K-Means con 3 clústeres.")
