@@ -106,7 +106,7 @@ import matplotlib.image as mpimg
 ruta_imagen_srnd = '/content/GALAPAGOS.csv/MyDrive/SRvsND.png'
 
 # Leemos la imagen para usarla como fondo del gráfico
-imagen_fondo = mpimg.imread(ruta_imagen_srnd)
+ruta_imagen_srnd = "SRvsND.png"
 
 # Creamos la figura y el eje donde se dibujará todo
 fig, ax = plt.subplots(figsize=(9, 10), dpi=150)
