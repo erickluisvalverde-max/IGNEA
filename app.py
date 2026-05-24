@@ -95,7 +95,25 @@ fig.update_traces(
     )
 )
 
-# Mostramos el gráfico dentro de la página de Streamlit
+
+
+# -------------------------
+# 4. La/Sm vs Sm/Yb (Plotly)
+# -------------------------
+
+# 1. Hacemos que Python calcule automáticamente las razones geoquímicas
+df['La_Sm'] = df['La'] / df['Sm']
+df['Sm_Yb'] = df['Sm'] / df['Yb']
+
+# 2. Creamos el gráfico de dispersión interactivo con Plotly
+fig = px.scatter(
+    df,
+    x='Sm_Yb',  # Eje X: indica mayor profundidad de fusión cuando el valor aumenta
+    y='La_Sm',  # Eje Y: indica una fuente más enriquecida cuando el valor aumenta
+    color='Location',  # Coloreamos por isla/localidad
+    hover_name='Sample',  # Nombre de la muestra al pasar el mouse
+    title='La/Sm vs Sm/Yb',
+    labels={# Mostramos el gráfico dentro de la página de Streamlit
 st.plotly_chart(fig, use_container_width=True)
 
 import matplotlib.pyplot as plt
@@ -103,10 +121,10 @@ import seaborn as sns
 import matplotlib.image as mpimg
 
 # Ruta de la imagen de fondo del diagrama Sr-Nd
-ruta_imagen_srnd = '/content/GALAPAGOS.csv/MyDrive/SRvsND.png'
+ruta_imagen_srnd = "SRvsND.png"
 
 # Leemos la imagen para usarla como fondo del gráfico
-ruta_imagen_srnd = "SRvsND.png"
+imagen_fondo = mpimg.imread(ruta_imagen_srnd)
 
 # Creamos la figura y el eje donde se dibujará todo
 fig, ax = plt.subplots(figsize=(9, 10), dpi=150)
@@ -118,7 +136,8 @@ ax.set_facecolor('white')
 limites_grafico = [0.703, 0.711, 0.5120, 0.5132]
 
 # Dibujamos la imagen de fondo en esas coordenadas
-ax.imshow(ruta_imagen_srnd, extent=limites_grafico, aspect='auto', zorder=1)
+ax.imshow(imagen_fondo, extent=limites_grafico, aspect='auto', zorder=1)
+
 # -------------------------
 # 3. TIPO DE MAGMA (Plotly)
 # -------------------------
@@ -127,13 +146,13 @@ sns.scatterplot(
     data=df,
     x='Sr87_Sr86',
     y='Nd143_Nd144',
-    hue='Location',  # Un color distinto para cada isla/localidad
+    hue='Location',
     ax=ax,
-    s=110,  # Tamaño del punto para que destaque bien
-    edgecolor='black',  # Borde negro para resaltar los puntos
+    s=110,
+    edgecolor='black',
     linewidth=0.8,
-    alpha=0.9,  # Un poco de transparencia
-    zorder=2  # Esto obliga a que los puntos queden por encima de la imagen
+    alpha=0.9,
+    zorder=2
 )
 
 # Título y nombres de ejes
@@ -156,24 +175,6 @@ plt.tight_layout()
 
 # Mostramos el gráfico dentro de Streamlit
 st.pyplot(fig)
-
-# -------------------------
-# 4. La/Sm vs Sm/Yb (Plotly)
-# -------------------------
-
-# 1. Hacemos que Python calcule automáticamente las razones geoquímicas
-df['La_Sm'] = df['La'] / df['Sm']
-df['Sm_Yb'] = df['Sm'] / df['Yb']
-
-# 2. Creamos el gráfico de dispersión interactivo con Plotly
-fig = px.scatter(
-    df,
-    x='Sm_Yb',  # Eje X: indica mayor profundidad de fusión cuando el valor aumenta
-    y='La_Sm',  # Eje Y: indica una fuente más enriquecida cuando el valor aumenta
-    color='Location',  # Coloreamos por isla/localidad
-    hover_name='Sample',  # Nombre de la muestra al pasar el mouse
-    title='La/Sm vs Sm/Yb',
-    labels={
         'Sm_Yb': 'Sm / Yb (A mayor valor, fusión más profunda)',
         'La_Sm': 'La / Sm (A mayor valor, fuente más enriquecida)',
         'Location': 'Isla'
