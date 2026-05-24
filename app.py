@@ -118,7 +118,7 @@ ax.set_facecolor('white')
 limites_grafico = [0.703, 0.711, 0.5120, 0.5132]
 
 # Dibujamos la imagen de fondo en esas coordenadas
-ax.imshow(imagen_fondo, extent=limites_grafico, aspect='auto', zorder=1)
+ax.imshow(ruta_imagen_srnd, extent=limites_grafico, aspect='auto', zorder=1)
 # -------------------------
 # 3. TIPO DE MAGMA (Plotly)
 # -------------------------
