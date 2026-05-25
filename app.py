@@ -647,7 +647,16 @@ if nombre_columna_localidad in df.columns and nombre_columna_muestra in df.colum
             marker=dict(size=8, color='red', symbol='diamond')
         ))
 
-       fig.add_trace(go.Scatter(
+               fig.add_trace(go.Scatter(
+            x=ree_disponibles,
+            y=oib_norm,
+            mode='lines+markers',
+            name='OIB (Referencia)',
+            line=dict(color='red', width=4, dash='dash'),
+            marker=dict(size=8, color='red', symbol='diamond')
+        ))
+
+        fig.add_trace(go.Scatter(
             x=ree_disponibles,
             y=morb_norm,
             mode='lines+markers',
@@ -656,7 +665,7 @@ if nombre_columna_localidad in df.columns and nombre_columna_muestra in df.colum
             marker=dict(size=8, color='blue', symbol='square')
         ))
 
-                fig.update_layout(
+        fig.update_layout(
             title='OIB y MORB',
             height=620,
             paper_bgcolor='white',
@@ -701,6 +710,7 @@ if nombre_columna_localidad in df.columns and nombre_columna_muestra in df.colum
                 title_font=dict(size=14, color='black')
             )
         )
+
         st.plotly_chart(fig, use_container_width=True)
     else:
         st.warning("No hay elementos REE disponibles en el archivo.")
