@@ -523,24 +523,13 @@ else:
     st.warning("Faltan columnas necesarias para el diagrama La/Sm vs Sm/Yb.")
 
 
-
 # =========================================================
-# 7. TAS + Fusión Parcial con línea alcalina interactiva
-# =========================================================
-
-if {'SiO2', 'Na2O', 'K2O', 'La', 'Sample', 'Location'}.issubset(df.columns):
-    st.markdown("""
-    <div class="section-card">
-        <h2 class="section-title">TAS + Fusión Parcial con línea alcalina</h2>
-        <p class="section-text">
-            Visualización interactiva del grado de fusión parcial y el límite alcalino.
-        </p># =========================================================
-# 5. Patrones REE · OIB y MORB
+# 5. Patrones REE OIB y MORB
 # =========================================================
 
 st.markdown("""
 <div class="section-card">
-    <h2 class="section-title">Patrones REE · OIB y MORB</h2>
+    <h2 class="section-title">Patrones REE OIB y MORB</h2>
     <p class="section-text">
         Comparación de patrones de tierras raras normalizados a condrito
         para identificar afinidades tipo OIB y MORB.
@@ -653,7 +642,7 @@ if nombre_columna_localidad in df.columns and nombre_columna_muestra in df.colum
                 )
             ),
             margin=dict(l=40, r=40, t=30, b=40),
-            xaxis_title='Elementos de Tierras Raras (LREE → HREE)',
+            xaxis_title='Elementos de Tierras Raras (LREE -> HREE)',
             yaxis_title='Muestra / Condrito'
         )
 
@@ -675,6 +664,148 @@ if nombre_columna_localidad in df.columns and nombre_columna_muestra in df.colum
         st.plotly_chart(fig, use_container_width=True)
 else:
     st.warning("Faltan columnas necesarias para generar patrones REE.")
+
+
+# =========================================================
+# 6. TAS con % de Fusión
+# =========================================================
+
+st.markdown('<div id="tas"></div>', unsafe_allow_html=True)
+
+st.markdown("""
+<div class="section-card">
+    <h2 class="section-title">TAS con % de Fusión Parcial</h2>
+    <p class="section-text">
+        Clasificación TAS integrada con estimaciones de
+        fusión parcial y dominios geoquímicos.
+    </p>
+</div>
+""", unsafe_allow_html=True)
+
+if {'SiO2', 'Na2O', 'K2O', 'La', 'Location', 'Sample'}.issubset(df.columns):
+    df_fusion = df.dropna(
+        subset=['La', 'SiO2', 'Na2O', 'K2O', 'Location', 'Sample']
+    ).copy()
+
+    if not df_fusion.empty:
+        C0_La = 0.687
+        D_La = 0.01
+
+        df_fusion['F_fraccion'] = ((C0_La / df_fusion['La']) - D_La) / (1 - D_La)
+        df_fusion['F_porcentaje'] = (df_fusion['F_fraccion'] * 100).clip(lower=0.1, upper=30)
+
+        occidental = [
+            'Isla Fernandina', 'Isla Isabela', 'Volcan Wolf', 'Volcan Darwin',
+            'Volcan Alcedo', 'Sierra Negra', 'Cerro Azul', 'Volcan Ecuador',
+            'Isla Tortuga', 'Roca Redonda'
+        ]
+
+        df_fusion['Region'] = df_fusion['Location'].apply(
+            lambda x: 'Occidental (Pluma Activa)' if x in occidental else 'Central / Oriental'
+        )
+
+        df_fusion['Alkalis'] = df_fusion['Na2O'] + df_fusion['K2O']
+
+        fig = px.scatter(
+            df_fusion,
+            x='SiO2',
+            y='Alkalis',
+            color='F_porcentaje',
+            color_continuous_scale='viridis',
+            symbol='Region',
+            hover_name='Sample',
+            hover_data=['Location', 'La'],
+            title='Clasificación TAS con % de Fusión Parcial',
+            labels={
+                'SiO2': 'SiO2 (wt%)',
+                'Alkalis': 'Na2O + K2O (wt%)',
+                'F_porcentaje': '% Fusión',
+                'Region': 'Dominio Geográfico'
+            },
+            template='plotly_white'
+        )
+
+        ruta_imagen_tas = "Diagrama tas.png"
+
+        if os.path.exists(ruta_imagen_tas):
+            with open(ruta_imagen_tas, "rb") as image_file:
+                encoded_string = base64.b64encode(image_file.read()).decode()
+
+            img_str = f"data:image/png;base64,{encoded_string}"
+
+            fig.add_layout_image(
+                dict(
+                    source=img_str,
+                    xref="x",
+                    yref="y",
+                    x=35,
+                    y=16,
+                    sizex=40,
+                    sizey=16,
+                    sizing="stretch",
+                    opacity=1,
+                    layer="below"
+                )
+            )
+
+        fig.update_layout(
+            xaxis_range=[35, 75],
+            yaxis_range=[0, 16],
+            template='plotly_white',
+            plot_bgcolor='rgba(0,0,0,0)',
+            coloraxis_colorbar=dict(title="Fusión (%)"),
+            width=950,
+            height=600,
+            title_x=0.02,
+            title_font_size=22
+        )
+
+        fig.update_traces(
+            marker=dict(size=12, line=dict(width=1, color='black')),
+            selector=dict(mode='markers')
+        )
+
+        st.plotly_chart(fig, use_container_width=True)
+
+        st.markdown("""
+        <div class="section-card">
+            <h2 class="section-title" style="font-size:1.3rem;">Promedio de fusión parcial por isla</h2>
+            <p class="section-text">Resumen promedio de fusión parcial estimada para cada localidad.</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+        resumen_fusion = (
+            df_fusion.groupby('Location')['F_porcentaje']
+            .mean()
+            .sort_values(ascending=False)
+            .reset_index()
+        )
+
+        resumen_fusion.rename(
+            columns={
+                'Location': 'Isla / Localidad',
+                'F_porcentaje': 'Fusión Parcial Promedio (%)'
+            },
+            inplace=True
+        )
+
+        resumen_fusion['Fusión Parcial Promedio (%)'] = resumen_fusion['Fusión Parcial Promedio (%)'].round(2)
+
+        st.dataframe(resumen_fusion, use_container_width=True)
+else:
+    st.warning("Faltan columnas necesarias para el TAS con fusión parcial.")
+
+# =========================================================
+# 7. TAS + Fusión Parcial con línea alcalina interactiva
+# =========================================================
+
+if {'SiO2', 'Na2O', 'K2O', 'La', 'Sample', 'Location'}.issubset(df.columns):
+    st.markdown("""
+    <div class="section-card">
+        <h2 class="section-title">TAS + Fusión Parcial con línea alcalina</h2>
+        <p class="section-text">
+            Visualización interactiva del grado de fusión parcial y el límite alcalino.
+        </p>
     </div>
     """, unsafe_allow_html=True)
 
@@ -733,6 +864,7 @@ else:
         fig.update_yaxes(showgrid=True, gridcolor='lightgray')
 
         st.plotly_chart(fig, use_container_width=True)
+
 
 # =========================================================
 # 8. TAS y Evolución Magmática
