@@ -483,11 +483,11 @@ if {'La', 'Sm', 'Yb', 'Location', 'Sample'}.issubset(df.columns):
             y='La_Sm',
             color='Location',
             hover_name='Sample',
-            title='',
+            title='La/Sm vs Sm/Yb',
             labels={
-                'Sm_Yb': 'Sm / Yb',
-                'La_Sm': 'La / Sm',
-                'Location': 'Isla'
+                'Sm_Yb': 'Sm / Yb (A mayor valor, fusión más profunda)',
+                'La_Sm': 'La / Sm (A mayor valor, fuente más enriquecida)',
+                'Location': 'Localidad'
             },
             template='plotly_white'
         )
@@ -496,34 +496,43 @@ if {'La', 'Sm', 'Yb', 'Location', 'Sample'}.issubset(df.columns):
             marker=dict(
                 size=13,
                 line=dict(width=1, color='black'),
-                opacity=0.92
+                opacity=0.95
             ),
             selector=dict(mode='markers')
         )
 
         fig.update_layout(
             height=620,
-            paper_bgcolor='rgba(0,0,0,0)',
+            paper_bgcolor='white',
             plot_bgcolor='white',
-            font=dict(family='Segoe UI', size=13, color='#0f172a'),
-            legend=dict(
-                title='Localidad',
-                bgcolor='rgba(255,255,255,0.85)',
-                bordercolor='#cbd5e1',
-                borderwidth=1
+            font=dict(family='Segoe UI', size=13, color='#2c3e50'),
+            title=dict(
+                x=0.01,
+                xanchor='left',
+                font=dict(size=22)
             ),
-            margin=dict(l=40, r=40, t=30, b=40)
+            legend=dict(
+                title='',
+                bgcolor='rgba(255,255,255,0.9)',
+                bordercolor='rgba(0,0,0,0)',
+                borderwidth=0,
+                x=1.02,
+                y=1,
+                xanchor='left',
+                yanchor='top'
+            ),
+            margin=dict(l=40, r=40, t=70, b=40)
         )
 
         fig.update_xaxes(
             showgrid=True,
-            gridcolor='rgba(148,163,184,0.25)',
+            gridcolor='rgba(200,200,200,0.35)',
             zeroline=False
         )
 
         fig.update_yaxes(
             showgrid=True,
-            gridcolor='rgba(148,163,184,0.25)',
+            gridcolor='rgba(200,200,200,0.35)',
             zeroline=False
         )
 
