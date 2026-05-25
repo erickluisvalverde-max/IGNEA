@@ -567,11 +567,10 @@ if nombre_columna_localidad in df.columns and nombre_columna_muestra in df.colum
             df_spider[col] = pd.to_numeric(df_spider[col], errors='coerce')
             df_spider[col] = df_spider[col].replace(0, np.nan)
 
-    for elemento in elementos_ree:
-        if elemento in df_spider.columns:
-            df_spider[elemento] = df_spider[elemento] / condrito[elemento]
-
     ree_disponibles = [e for e in elementos_ree if e in df_spider.columns]
+
+    for elemento in ree_disponibles:
+        df_spider[elemento] = df_spider[elemento] / condrito[elemento]
 
     if ree_disponibles:
         df_melted = df_spider.melt(
@@ -581,31 +580,56 @@ if nombre_columna_localidad in df.columns and nombre_columna_muestra in df.colum
             value_name='Concentracion_Normalizada'
         ).dropna(subset=['Concentracion_Normalizada'])
 
-        fig = px.line(
-            df_melted,
-            x='Elemento',
-            y='Concentracion_Normalizada',
-            color=nombre_columna_localidad,
-            line_group=nombre_columna_muestra,
-            hover_name=nombre_columna_muestra,
-            title='<b>OIB y MORB</b>',
-            log_y=True,
-            markers=True
-        )
+        fig = go.Figure()
 
-        # Igual que tu Colab, solo un poco menos transparente
-        fig.update_traces(
-            line=dict(width=1),
-            opacity=0.4,
-            marker=dict(size=4)
-        )
+        localidades = df_melted[nombre_columna_localidad].dropna().unique().tolist()
+        colores = px.colors.qualitative.Plotly + px.colors.qualitative.Set3 + px.colors.qualitative.Light24
+        mapa_colores = {loc: colores[i % len(colores)] for i, loc in enumerate(localidades)}
 
-        # Líneas de referencia OIB y MORB
+        for muestra in df_melted[nombre_columna_muestra].dropna().unique():
+            df_muestra = df_melted[df_melted[nombre_columna_muestra] == muestra].copy()
+            if df_muestra.empty:
+                continue
+
+            localidad = df_muestra[nombre_columna_localidad].iloc[0]
+            df_muestra['Elemento'] = pd.Categorical(df_muestra['Elemento'], categories=ree_disponibles, ordered=True)
+            df_muestra = df_muestra.sort_values('Elemento')
+
+            fig.add_trace(go.Scatter(
+                x=df_muestra['Elemento'],
+                y=df_muestra['Concentracion_Normalizada'],
+                mode='lines+markers',
+                name=str(localidad),
+                legendgroup=str(localidad),
+                showlegend=False,
+                line=dict(color=mapa_colores[localidad], width=1),
+                marker=dict(size=4, color=mapa_colores[localidad]),
+                opacity=0.45,
+                hovertemplate=(
+                    'Muestra: %{text}<br>'
+                    'Elemento: %{x}<br>'
+                    'Normalizado: %{y:.3f}<extra></extra>'
+                ),
+                text=df_muestra[nombre_columna_muestra]
+            ))
+
+        for loc in localidades:
+            fig.add_trace(go.Scatter(
+                x=[None],
+                y=[None],
+                mode='lines',
+                name=str(loc),
+                legendgroup=str(loc),
+                showlegend=True,
+                line=dict(color=mapa_colores[loc], width=2)
+            ))
+
         oib_norm = [oib_ref[e] / condrito[e] for e in ree_disponibles]
         morb_norm = [morb_ref[e] / condrito[e] for e in ree_disponibles]
 
         fig.add_trace(go.Scatter(
-            x=ree_disponibles, y=oib_norm,
+            x=ree_disponibles,
+            y=oib_norm,
             mode='lines+markers',
             name='OIB (Referencia)',
             line=dict(color='red', width=4, dash='dash'),
@@ -613,32 +637,49 @@ if nombre_columna_localidad in df.columns and nombre_columna_muestra in df.colum
         ))
 
         fig.add_trace(go.Scatter(
-            x=ree_disponibles, y=morb_norm,
+            x=ree_disponibles,
+            y=morb_norm,
             mode='lines+markers',
             name='N-MORB (Referencia)',
             line=dict(color='blue', width=4, dash='dash'),
             marker=dict(size=8, color='blue', symbol='square')
         ))
 
-        # Aquí está el arreglo: SIN grilla y sin líneas extras raras
         fig.update_layout(
-            xaxis_title='<b>Elementos de Tierras Raras (LREE -> HREE)</b>',
-            yaxis_title='<b>Muestra / Condrito</b>',
-            template='plotly_white',
-            hovermode='closest',
-            height=600,
+            height=620,
             paper_bgcolor='white',
             plot_bgcolor='white',
+            hovermode='closest',
+            font=dict(family='Segoe UI', size=14, color='black'),
+            title=dict(text='OIB y MORB', font=dict(size=20, color='black')),
             legend=dict(
+                title='Location',
                 bgcolor='white',
                 bordercolor='lightgray',
                 borderwidth=1,
-                font=dict(color='black')
+                font=dict(color='black', size=12),
+                title_font=dict(color='black', size=13)
+            ),
+            xaxis=dict(
+                title='Elementos de Tierras Raras (LREE -> HREE)',
+                showgrid=False,
+                zeroline=False,
+                showline=False,
+                tickfont=dict(size=12, color='black'),
+                title_font=dict(size=14, color='black'),
+                showspikes=False
+            ),
+            yaxis=dict(
+                title='Muestra / Condrito',
+                type='log',
+                showgrid=False,
+                zeroline=False,
+                showline=False,
+                tickfont=dict(size=12, color='black'),
+                title_font=dict(size=14, color='black'),
+                showspikes=False
             )
         )
-
-        fig.update_xaxes(showgrid=False, zeroline=False)
-        fig.update_yaxes(showgrid=False, zeroline=False)
 
         st.plotly_chart(fig, use_container_width=True)
     else:
