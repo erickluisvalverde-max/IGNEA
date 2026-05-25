@@ -520,14 +520,15 @@ if nombre_columna_localidad in df.columns and nombre_columna_muestra in df.colum
             color=nombre_columna_localidad,
             line_group=nombre_columna_muestra,
             hover_name=nombre_columna_muestra,
-            title='',
+            title='OIB y MORB',
             log_y=True,
-            markers=True
+            markers=True,
+            template='plotly_white'
         )
 
         fig.update_traces(
             line=dict(width=1),
-            opacity=0.55,
+            opacity=0.4,
             marker=dict(size=4)
         )
 
@@ -553,19 +554,46 @@ if nombre_columna_localidad in df.columns and nombre_columna_muestra in df.colum
         ))
 
         fig.update_layout(
-            xaxis_title='Elementos de Tierras Raras (LREE -> HREE)',
-            yaxis_title='Muestra / Condrito',
-            template='plotly_white',
-            hovermode='closest',
             height=600,
             paper_bgcolor='white',
             plot_bgcolor='white',
+            hovermode='closest',
+            font=dict(
+                family='Segoe UI',
+                size=14,
+                color='black'
+            ),
+            title_font=dict(size=20, color='black'),
             legend=dict(
+                title='Location',
                 bgcolor='white',
                 bordercolor='lightgray',
                 borderwidth=1,
-                font=dict(color='black')
-            )
+                font=dict(color='black', size=12),
+                title_font=dict(color='black', size=13)
+            ),
+            xaxis_title='Elementos de Tierras Raras (LREE -> HREE)',
+            yaxis_title='Muestra / Condrito'
+        )
+
+        fig.update_xaxes(
+            showgrid=False,
+            zeroline=False,
+            showline=False,
+            ticks='outside',
+            tickfont=dict(size=12, color='black'),
+            title_font=dict(size=14, color='black'),
+            showspikes=False
+        )
+
+        fig.update_yaxes(
+            showgrid=False,
+            zeroline=False,
+            showline=False,
+            ticks='outside',
+            tickfont=dict(size=12, color='black'),
+            title_font=dict(size=14, color='black'),
+            showspikes=False
         )
 
         st.plotly_chart(fig, use_container_width=True)
