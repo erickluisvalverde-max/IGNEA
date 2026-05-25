@@ -458,123 +458,70 @@ if {'Sr87_Sr86', 'Nd143_Nd144', 'Location'}.issubset(df.columns):
 # 4. La/Sm vs Sm/Yb
 # =========================================================
 
-import plotly.express as px
-import pandas as pd
-import numpy as np
+st.markdown('<div id="ree"></div>', unsafe_allow_html=True)
 
-# Copia segura
-df_ratio = df.copy()
+st.markdown("""
+<div class="section-card">
+    <h2 class="section-title">La/Sm vs Sm/Yb</h2>
+    <p class="section-text">
+        Variaciones geoquímicas de elementos de tierras raras
+        para interpretar enriquecimiento mantélico y profundidad de fusión.
+    </p>
+</div>
+""", unsafe_allow_html=True)
 
-# Aseguramos que las columnas sean numéricas
-for col in ['La', 'Sm', 'Yb']:
-    if col in df_ratio.columns:
-        df_ratio[col] = pd.to_numeric(df_ratio[col], errors='coerce')
+if {'La', 'Sm', 'Yb', 'Location', 'Sample'}.issubset(df.columns):
+    df_ree = df.dropna(subset=['La', 'Sm', 'Yb']).copy()
 
-# Reemplazamos ceros por NaN para evitar divisiones problemáticas
-df_ratio[['La', 'Sm', 'Yb']] = df_ratio[['La', 'Sm', 'Yb']].replace(0, np.nan)
+    if not df_ree.empty:
+        df_ree['La_Sm'] = df_ree['La'] / df_ree['Sm']
+        df_ree['Sm_Yb'] = df_ree['Sm'] / df_ree['Yb']
 
-# Calculamos razones
-df_ratio['LaSm'] = df_ratio['La'] / df_ratio['Sm']
-df_ratio['SmYb'] = df_ratio['Sm'] / df_ratio['Yb']
+        fig = px.scatter(
+            df_ree,
+            x='Sm_Yb',
+            y='La_Sm',
+            color='Location',
+            hover_name='Sample',
+            title='',
+            labels={
+                'Sm_Yb': 'Sm / Yb',
+                'La_Sm': 'La / Sm',
+                'Location': 'Isla'
+            },
+            template='plotly_white'
+        )
 
-# Quitamos filas sin datos válidos
-df_ratio = df_ratio.dropna(subset=['LaSm', 'SmYb'])
+        fig.update_traces(
+            marker=dict(
+                size=13,
+                line=dict(width=1, color='black'),
+                opacity=0.92
+            ),
+            selector=dict(mode='markers')
+        )
 
-# Creamos figura
-fig = px.scatter(
-    df_ratio,
-    x='SmYb',
-    y='LaSm',
-    color=nombre_columna_localidad,
-    hover_name=nombre_columna_muestra,
-    title='La/Sm vs Sm/Yb',
-    labels={
-        'SmYb': 'Sm / Yb  (a mayor valor, fusión más profunda)',
-        'LaSm': 'La / Sm  (a mayor valor, fuente más enriquecida)',
-        nombre_columna_localidad: 'Localidad'
-    },
-    template='plotly_white'
-)
+        fig.update_layout(
+            height=620,
+            paper_bgcolor='rgba(0,0,0,0)',
+            plot_bgcolor='white',
+            font=dict(family='Segoe UI', size=13, color='#0f172a'),
+            legend=dict(
+                title='Localidad',
+                bgcolor='rgba(255,255,255,0.85)',
+                bordercolor='#cbd5e1',
+                borderwidth=1
+            ),
+            margin=dict(l=40, r=40, t=30, b=40)
+        )
 
-# Estilo de puntos
-fig.update_traces(
-    mode='markers',
-    marker=dict(
-        size=12,
-        line=dict(width=1.2, color='black'),
-        opacity=0.85
-    ),
-    selector=dict(mode='markers')
-)
+        fig.update_xaxes(showgrid=True, gridcolor='rgba(148,163,184,0.25)', zeroline=False)
+        fig.update_yaxes(showgrid=True, gridcolor='rgba(148,163,184,0.25)', zeroline=False)
 
-# Mejoramos visibilidad de textos, ejes y leyenda
-fig.update_layout(
-    width=1000,
-    height=650,
-    paper_bgcolor='white',
-    plot_bgcolor='white',
-    hovermode='closest',
+        st.plotly_chart(fig, use_container_width=True)
+else:
+    st.warning("Faltan columnas necesarias para el diagrama La/Sm vs Sm/Yb.")
 
-    title=dict(
-        text='La/Sm vs Sm/Yb',
-        x=0.5,
-        xanchor='center',
-        font=dict(size=22, color='black')
-    ),
-
-    font=dict(
-        family='Arial',
-        size=14,
-        color='black'
-    ),
-
-    xaxis=dict(
-        title=dict(
-            text='Sm / Yb  (a mayor valor, fusión más profunda)',
-            font=dict(size=16, color='black')
-        ),
-        tickfont=dict(size=13, color='black'),
-        showgrid=True,
-        gridcolor='lightgray',
-        zeroline=False,
-        showline=True,
-        linecolor='black',
-        mirror=True
-    ),
-
-    yaxis=dict(
-        title=dict(
-            text='La / Sm  (a mayor valor, fuente más enriquecida)',
-            font=dict(size=16, color='black')
-        ),
-        tickfont=dict(size=13, color='black'),
-        showgrid=True,
-        gridcolor='lightgray',
-        zeroline=False,
-        showline=True,
-        linecolor='black',
-        mirror=True
-    ),
-
-    legend=dict(
-        title=dict(
-            text='Localidad',
-            font=dict(size=14, color='black')
-        ),
-        font=dict(size=12, color='black'),
-        bgcolor='rgba(255,255,255,0.95)',
-        bordercolor='black',
-        borderwidth=1
-    ),
-
-    hoverlabel=dict(
-        bgcolor='white',
-        bordercolor='black',
-        font=dict(size=12, color='black')
-    )
-)
-
-st.plotly_chart(fig, use_container_width=True)
 # =========================================================
 # 5. Patrones REE OIB y MORB
 # =========================================================
