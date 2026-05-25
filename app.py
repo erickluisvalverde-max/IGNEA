@@ -11,6 +11,11 @@ import plotly.graph_objects as go
 from PIL import Image
 from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import KMeans
+
+# =========================================================
+# CONFIG
+# =========================================================
+
 st.set_page_config(
     page_title="Análisis Geoquímico de Galápagos",
     layout="wide",
@@ -22,44 +27,45 @@ st.set_page_config(
 # =========================================================
 
 st.sidebar.markdown("""
-<h1 style="
-    color:#0f172a;
-    font-size:2rem;
+<style>
+.sidebar-title{
+    font-size:1.7rem;
     font-weight:800;
-    margin-bottom:2rem;
-">
-    Panel Geoquímico
-</h1>
-""", unsafe_allow_html=True)
+    color:white;
+    margin-bottom:1rem;
+}
 
-st.sidebar.markdown("""
-<div style="
-    background:white;
+.sidebar-card{
+    background:rgba(255,255,255,0.08);
     padding:1rem;
     border-radius:16px;
-    border:1px solid #e2e8f0;
-    box-shadow:0 4px 14px rgba(0,0,0,0.05);
-">
+    border:1px solid rgba(255,255,255,0.08);
+}
 
-<p style="
-    color:#64748b;
-    font-size:0.95rem;
-    margin-bottom:0.8rem;
-    font-weight:600;
-">
-    Herramientas
-</p>
-
-<ul style="
-    padding-left:1.2rem;
-    line-height:2;
+.sidebar-card a{
+    text-decoration:none;
+    color:white !important;
     font-size:1rem;
-">
-    <li><a href="#srnd">Sr vs Nd</a></li>
-    <li><a href="#ree">REE</a></li>
-    <li><a href="#tas">TAS</a></li>
-    <li><a href="#clustering">Clustering</a></li>
-</ul>
+    line-height:2.2;
+    font-weight:500;
+}
+
+.sidebar-card a:hover{
+    color:#93c5fd !important;
+}
+</style>
+
+<div class="sidebar-title">
+    Panel Geoquímico
+</div>
+
+<div class="sidebar-card">
+
+<a href="#top">Vista General</a><br>
+<a href="#srnd">Sr vs Nd</a><br>
+<a href="#ree">REE</a><br>
+<a href="#tas">TAS</a><br>
+<a href="#clustering">Clustering</a>
 
 </div>
 """, unsafe_allow_html=True)
@@ -71,119 +77,137 @@ st.sidebar.markdown("""
 st.markdown("""
 <style>
 
-    .stApp {
-        background: linear-gradient(180deg, #f4f7fb 0%, #eaf0f8 100%);
-    }
+.stApp{
+    background:
+    linear-gradient(180deg,#f8fafc 0%,#edf2f7 100%);
+}
 
-    .block-container {
-        padding-top: 2rem;
-        padding-bottom: 2rem;
-        padding-left: 2.5rem;
-        padding-right: 2.5rem;
-        max-width: 1400px;
-    }
+.block-container{
+    padding-top:2rem;
+    padding-bottom:2rem;
+    padding-left:2.5rem;
+    padding-right:2.5rem;
+    max-width:1450px;
+}
 
-    h1, h2, h3 {
-        color: #0f172a;
-        font-family: "Segoe UI", sans-serif;
-    }
+section[data-testid="stSidebar"]{
+    background:
+    linear-gradient(180deg,#081224 0%,#10284a 100%);
+}
 
-    .main-title {
-        font-size: 2.8rem;
-        font-weight: 800;
-        color: white;
-        margin-bottom: 0.5rem;
-    }
+h1,h2,h3{
+    font-family:"Segoe UI",sans-serif;
+    color:#0f172a;
+}
 
-    .subtitle {
-        font-size: 1.05rem;
-        color: #dbeafe;
-        margin-bottom: 0;
-        line-height: 1.7;
-    }
+.hero-box{
+    background:
+    linear-gradient(
+        135deg,
+        #081224 0%,
+        #10284a 50%,
+        #1d4e89 100%
+    );
 
-    .hero-box {
-        background: linear-gradient(
-            135deg,
-            #081224 0%,
-            #10284a 50%,
-            #1d4e89 100%
-        );
+    border-radius:28px;
+    padding:2.3rem;
+    margin-bottom:2rem;
 
-        padding: 2rem;
-        border-radius: 24px;
-        box-shadow: 0 12px 35px rgba(15, 23, 42, 0.22);
-        margin-bottom: 2rem;
-    }
+    box-shadow:
+    0 14px 40px rgba(15,23,42,0.20);
+}
 
-    .section-card {
-        background: white;
-        border-radius: 20px;
-        padding: 1.4rem;
-        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
-        border: 1px solid #e2e8f0;
-        margin-bottom: 1.5rem;
-    }
+.main-title{
+    color:white;
+    font-size:3rem;
+    font-weight:800;
+    margin-bottom:0.6rem;
+}
 
-    div[data-testid="stDataFrame"] {
-        background: white;
-        border-radius: 16px;
-        padding: 0.5rem;
-        border: 1px solid #dbe2ea;
-        box-shadow: 0 4px 14px rgba(0,0,0,0.04);
-    }
+.subtitle{
+    color:#dbeafe;
+    font-size:1.08rem;
+    line-height:1.8;
+    margin-bottom:0;
+}
 
-    div[data-testid="stPlotlyChart"],
-    div[data-testid="stPyplot"] {
-        background: white;
-        border-radius: 18px;
-        padding: 1rem;
-        border: 1px solid #e2e8f0;
-        box-shadow: 0 6px 18px rgba(0,0,0,0.05);
-        margin-bottom: 1.5rem;
-    }
+.mini-tag{
+    display:inline-block;
+    background:rgba(255,255,255,0.12);
+    border:1px solid rgba(255,255,255,0.12);
+    color:#dbeafe;
+    padding:0.45rem 0.9rem;
+    border-radius:999px;
+    font-size:0.82rem;
+    font-weight:700;
+    margin-bottom:1rem;
+}
 
-    div[data-testid="stFileUploader"] {
-        background: white;
-        border-radius: 18px;
-        padding: 1rem;
-        border: 1px dashed #94a3b8;
-        box-shadow: 0 6px 18px rgba(0,0,0,0.04);
-    }
+.section-card{
+    background:white;
+    border-radius:22px;
+    padding:1.5rem;
+    border:1px solid #e2e8f0;
+    box-shadow:
+    0 6px 22px rgba(0,0,0,0.05);
 
-    .mini-tag {
-        display: inline-block;
-        background: rgba(255,255,255,0.12);
-        color: #dbeafe;
-        padding: 0.45rem 0.9rem;
-        border-radius: 999px;
-        font-size: 0.85rem;
-        font-weight: 600;
-        margin-bottom: 1rem;
-        border: 1px solid rgba(255,255,255,0.15);
-    }
+    margin-bottom:1.5rem;
+}
 
-    hr {
-        margin-top: 2rem;
-        margin-bottom: 1.5rem;
-        border: none;
-        height: 1px;
-        background: linear-gradient(
-            to right,
-            transparent,
-            #94a3b8,
-            transparent
-        );
-    }
+div[data-testid="stDataFrame"]{
+    background:white;
+    border-radius:18px;
+    padding:0.4rem;
+    border:1px solid #e2e8f0;
+    box-shadow:
+    0 4px 14px rgba(0,0,0,0.04);
+}
+
+div[data-testid="stPlotlyChart"],
+div[data-testid="stPyplot"]{
+    background:white;
+    border-radius:20px;
+    padding:1rem;
+    border:1px solid #e2e8f0;
+    box-shadow:
+    0 6px 18px rgba(0,0,0,0.05);
+
+    margin-bottom:1.5rem;
+}
+
+div[data-testid="stFileUploader"]{
+    background:white;
+    border-radius:18px;
+    padding:1rem;
+    border:1px dashed #94a3b8;
+    box-shadow:
+    0 6px 18px rgba(0,0,0,0.04);
+}
+
+hr{
+    margin-top:2rem;
+    margin-bottom:2rem;
+    border:none;
+    height:1px;
+    background:
+    linear-gradient(
+        to right,
+        transparent,
+        #cbd5e1,
+        transparent
+    );
+}
 
 </style>
 """, unsafe_allow_html=True)
 
 # =========================================================
-# HERO
+# HERO PRINCIPAL
 # =========================================================
 
 st.markdown("""
+<div id="top"></div>
+
 <div class="hero-box">
 
     <div class="mini-tag">
@@ -191,12 +215,13 @@ st.markdown("""
     </div>
 
     <h1 class="main-title">
-        Análisis geoquímico de Galápagos
+        Análisis Geoquímico de Galápagos
     </h1>
 
     <p class="subtitle">
         Plataforma interactiva para explorar relaciones isotópicas,
-        clasificación TAS, tierras raras, fusión parcial y dominios geoquímicos.
+        clasificación TAS, tierras raras, fusión parcial
+        y dominios geoquímicos.
     </p>
 
 </div>
@@ -252,7 +277,7 @@ if "Rb" in df.columns:
 st.success("¡Excel cargado correctamente!")
 
 # =========================================================
-# PANEL GENERAL
+# VISTA GENERAL
 # =========================================================
 
 st.markdown("""
@@ -260,10 +285,9 @@ st.markdown("""
 
 <h2 style="
     margin-top:0;
-    color:#0f172a;
+    margin-bottom:0.5rem;
     font-size:1.8rem;
     font-weight:800;
-    margin-bottom:0.5rem;
 ">
     Vista General del Dataset
 </h2>
@@ -272,11 +296,11 @@ st.markdown("""
     color:#64748b;
     font-size:1rem;
     line-height:1.7;
-    margin-bottom:1.5rem;
+    margin-bottom:0;
 ">
     Visualización inicial del archivo geoquímico cargado.
     Aquí puedes inspeccionar muestras, variables químicas
-    y relaciones isotópicas antes de realizar el análisis.
+    y relaciones isotópicas antes del análisis.
 </p>
 
 </div>
@@ -285,18 +309,21 @@ st.markdown("""
 col1, col2, col3 = st.columns(3)
 
 with col1:
+
     st.metric(
         label="Número de muestras",
         value=len(df)
     )
 
 with col2:
+
     st.metric(
         label="Variables geoquímicas",
         value=len(df.columns)
     )
 
 with col3:
+
     st.metric(
         label="Valores faltantes",
         value=int(df.isna().sum().sum())
