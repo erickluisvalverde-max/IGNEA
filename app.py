@@ -183,14 +183,18 @@ st.markdown("""
         Relaciones isotópicas entre Sr y Nd para interpretar
         fuentes mantélicas y dominios geoquímicos.
     </p>
-</div>
 """, unsafe_allow_html=True)
 
 if {'Sr87_Sr86', 'Nd143_Nd144', 'Location'}.issubset(df.columns):
 
     sns.set_theme(style="whitegrid")
 
-    fig, ax = plt.subplots(figsize=(10, 6))
+    fig, ax = plt.subplots(
+        figsize=(10, 6),
+        facecolor="white"
+    )
+
+    ax.set_facecolor("#f8fafc")
 
     sns.scatterplot(
         data=df.dropna(subset=['Sr87_Sr86', 'Nd143_Nd144', 'Location']),
@@ -198,32 +202,54 @@ if {'Sr87_Sr86', 'Nd143_Nd144', 'Location'}.issubset(df.columns):
         y="Nd143_Nd144",
         hue="Location",
         palette="tab10",
-        s=100,
+        s=120,
         edgecolor="black",
+        linewidth=0.8,
+        alpha=0.95,
         ax=ax
     )
 
     ax.set_title(
-        "Sr vs Nd",
-        fontsize=15,
-        fontweight="bold"
+        "Relación isotópica Sr vs Nd",
+        fontsize=16,
+        fontweight="bold",
+        color="#0f172a",
+        pad=16
     )
 
     ax.set_xlabel(
-        "87Sr / 86Sr",
-        fontsize=12
+        r"$^{87}$Sr / $^{86}$Sr",
+        fontsize=12,
+        fontweight="bold",
+        color="#334155"
     )
 
     ax.set_ylabel(
-        "143Nd / 144Nd",
-        fontsize=12
+        r"$^{143}$Nd / $^{144}$Nd",
+        fontsize=12,
+        fontweight="bold",
+        color="#334155"
     )
 
-    ax.legend(
+    ax.grid(
+        True,
+        linestyle="--",
+        linewidth=0.6,
+        alpha=0.35
+    )
+
+    for spine in ax.spines.values():
+        spine.set_visible(False)
+
+    legend = ax.legend(
+        title="Localidad",
         bbox_to_anchor=(1.02, 1),
         loc="upper left",
         frameon=True
     )
+
+    legend.get_frame().set_facecolor("white")
+    legend.get_frame().set_edgecolor("#cbd5e1")
 
     fig.tight_layout()
 
@@ -232,6 +258,9 @@ if {'Sr87_Sr86', 'Nd143_Nd144', 'Location'}.issubset(df.columns):
 else:
     st.warning("Faltan columnas para el diagrama Sr vs Nd.")
 
+st.markdown("</div>", unsafe_allow_html=True)
+
+# -------------------------
 # -------------------------
 # 2. Sr vs Nd interactivo (Plotly)
 # -------------------------
