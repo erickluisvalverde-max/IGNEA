@@ -957,21 +957,11 @@ st.markdown('<div id="clustering"></div>', unsafe_allow_html=True)
 
 st.markdown("""
 <div class="section-card">
-    <h2 style="
-        margin-top:0;
-        margin-bottom:0.4rem;
-        color:#0f172a;
-        font-size:1.6rem;
-        font-weight:800;
-    ">
+    <h2>
         Clustering Geoquímico K-Means
     </h2>
 
-    <p style="
-        color:#64748b;
-        font-size:0.95rem;
-        margin-bottom:0;
-    ">
+    <p>
         Agrupamiento geoquímico automático basado en
         relaciones isotópicas y elementos REE para
         interpretar dominios mantélicos.
@@ -1074,12 +1064,7 @@ if set(columnas_ml).issubset(df.columns):
 
         st.markdown("""
         <div class="section-card">
-            <h3 style="
-                margin-top:0;
-                color:#0f172a;
-                font-size:1.25rem;
-                font-weight:700;
-            ">
+            <h3>
                 Resumen de agrupamientos geoquímicos
             </h3>
         </div>
