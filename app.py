@@ -1,5 +1,4 @@
-
-# -------------import os
+import os
 import base64
 import numpy as np
 import pandas as pd
@@ -9,236 +8,136 @@ import matplotlib.image as mpimg
 import seaborn as sns
 import plotly.express as px
 import plotly.graph_objects as go
-
 from PIL import Image
 from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import KMeans
-
-# =========================================================
-# CONFIGURACIÓN STREAMLIT
-# =========================================================
-
-st.set_page_config(
-    page_title="Análisis Geoquímico de Galápagos",
-    layout="wide"
-)
-
-# =========================================================
-# TEMA GENERAL
-# =========================================================
-
-sns.set_theme(
-    style="whitegrid",
-    context="talk",
-    palette="deep"
-)
-
-# =========================================================
-# CSS PROFESIONAL
-# =========================================================
-
 st.markdown("""
 <style>
+    .stApp {
+        background: linear-gradient(180deg, #f4f7fb 0%, #eaf0f8 100%);
+    }
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+    .block-container {
+        padding-top: 2rem;
+        padding-bottom: 2rem;
+        padding-left: 2.5rem;
+        padding-right: 2.5rem;
+        max-width: 1400px;
+    }
 
-html, body, [class*="css"]  {
-    font-family: 'Inter', sans-serif;
-}
+    h1, h2, h3 {
+        color: #0f172a;
+        font-family: "Segoe UI", sans-serif;
+    }
 
-/* FONDO */
-.stApp {
-    background:
-        radial-gradient(circle at top left, rgba(37,99,235,0.08), transparent 30%),
-        radial-gradient(circle at bottom right, rgba(14,165,233,0.08), transparent 30%),
-        linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
-}
+    .main-title {
+        font-size: 2.2rem;
+        font-weight: 800;
+        color: #0b1f3a;
+        margin-bottom: 0.2rem;
+    }
 
-/* CONTENEDOR */
-.block-container {
-    padding-top: 2rem;
-    padding-bottom: 3rem;
-    padding-left: 3rem;
-    padding-right: 3rem;
-    max-width: 1500px;
-}
+    .subtitle {
+        font-size: 1.05rem;
+        color: #475569;
+        margin-bottom: 1.5rem;
+    }
 
-/* SIDEBAR */
-section[data-testid="stSidebar"] {
-    background: linear-gradient(180deg, #0f172a 0%, #111827 100%);
-}
+    .hero-box {
+        background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%);
+        padding: 1.4rem 1.6rem;
+        border-radius: 18px;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.18);
+        margin-bottom: 1.5rem;
+    }
 
-section[data-testid="stSidebar"] * {
-    color: white !important;
-}
+    .hero-box h1 {
+        color: white !important;
+        margin-bottom: 0.3rem;
+    }
 
-/* HERO */
-.hero-box {
+    .hero-box p {
+        color: #dbeafe;
+        margin: 0;
+        font-size: 1rem;
+    }
 
-    background:
-        linear-gradient(135deg, rgba(15,23,42,0.95), rgba(30,41,59,0.92));
+    .section-card {
+        background: white;
+        border-radius: 18px;
+        padding: 1.2rem 1.2rem 0.8rem 1.2rem;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+        border: 1px solid #e2e8f0;
+        margin-bottom: 1.2rem;
+    }
 
-    padding: 2.5rem;
+    div[data-testid="stDataFrame"] {
+        background: white;
+        border-radius: 14px;
+        padding: 0.4rem;
+        border: 1px solid #dbe2ea;
+        box-shadow: 0 4px 14px rgba(0,0,0,0.04);
+    }
 
-    border-radius: 30px;
+    div[data-testid="stPlotlyChart"],
+    div[data-testid="stPyplot"] {
+        background: white;
+        border-radius: 16px;
+        padding: 0.8rem;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 6px 18px rgba(0,0,0,0.05);
+        margin-bottom: 1rem;
+    }
 
-    box-shadow:
-        0 12px 40px rgba(15,23,42,0.18);
+    div[data-testid="stFileUploader"] {
+        background: white;
+        border-radius: 16px;
+        padding: 1rem;
+        border: 1px dashed #94a3b8;
+        box-shadow: 0 6px 18px rgba(0,0,0,0.04);
+    }
 
-    margin-bottom: 2rem;
+    .mini-tag {
+        display: inline-block;
+        background: #dbeafe;
+        color: #1d4ed8;
+        padding: 0.35rem 0.7rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-bottom: 0.8rem;
+    }
 
-    border: 1px solid rgba(255,255,255,0.06);
-}
-
-.main-title {
-    font-size: 3rem;
-    font-weight: 800;
-    color: white;
-    margin-bottom: 0.5rem;
-}
-
-.subtitle {
-    color: #dbeafe;
-    font-size: 1.05rem;
-    line-height: 1.8;
-}
-
-.mini-tag {
-    display: inline-block;
-    background: rgba(59,130,246,0.18);
-    color: #93c5fd;
-    border: 1px solid rgba(147,197,253,0.25);
-    padding: 0.45rem 0.9rem;
-    border-radius: 999px;
-    font-size: 0.82rem;
-    font-weight: 700;
-    margin-bottom: 1rem;
-}
-
-/* TARJETAS */
-.section-card {
-    background: rgba(255,255,255,0.85);
-    border-radius: 24px;
-    padding: 1.5rem;
-    border: 1px solid rgba(255,255,255,0.5);
-    box-shadow: 0 8px 30px rgba(15,23,42,0.06);
-    margin-bottom: 1.6rem;
-}
-
-/* TITULOS */
-h1, h2, h3 {
-    color: #0f172a;
-    font-weight: 700;
-}
-
-/* DATAFRAME */
-div[data-testid="stDataFrame"] {
-    border-radius: 18px;
-    overflow: hidden;
-}
-
-/* GRAFICOS */
-div[data-testid="stPlotlyChart"],
-div[data-testid="stPyplot"] {
-
-    background: rgba(255,255,255,0.92);
-
-    border-radius: 22px;
-
-    padding: 1rem;
-
-    border: 1px solid rgba(255,255,255,0.5);
-
-    box-shadow:
-        0 8px 30px rgba(15,23,42,0.06);
-
-    margin-top: 1rem;
-    margin-bottom: 1rem;
-}
-
-/* FILE UPLOADER */
-div[data-testid="stFileUploader"] {
-
-    background: rgba(255,255,255,0.9);
-
-    border-radius: 20px;
-
-    padding: 1rem;
-
-    border: 2px dashed #94a3b8;
-}
-
+    hr {
+        margin-top: 1.8rem;
+        margin-bottom: 1.2rem;
+        border: none;
+        height: 1px;
+        background: linear-gradient(to right, transparent, #94a3b8, transparent);
+    }
 </style>
 """, unsafe_allow_html=True)
 
-# =========================================================
-# HERO PRINCIPAL
-# =========================================================
+st.set_page_config(page_title="Análisis Geoquímico de Galápagos", layout="wide")
 
 st.markdown("""
 <div class="hero-box">
-
-    <div class="mini-tag">
-        Geoquímica · Petrología · Visualización Científica
-    </div>
-
-    <div class="main-title">
-        Análisis Geoquímico de Galápagos
-    </div>
-
+    <div class="mini-tag">Geoquímica · Visualización · Galápagos</div>
+    <h1 class="main-title">Análisis geoquímico de Galápagos</h1>
     <p class="subtitle">
-        Plataforma interactiva para explorar relaciones isotópicas,
-        clasificación TAS, patrones REE,
-        fusión parcial y dominios geoquímicos.
+        Plataforma interactiva para explorar relaciones isotópicas, clasificación TAS,
+        tierras raras, fusión parcial y dominios geoquímicos.
     </p>
-
 </div>
 """, unsafe_allow_html=True)
-
-# =========================================================
-# SIDEBAR
-# =========================================================
-
-st.sidebar.title("Panel Geoquímico")
-
-st.sidebar.markdown("---")
-
-seccion = st.sidebar.radio(
-    "Navegación",
-    [
-        "Vista previa",
-        "Sr vs Nd",
-        "Sr vs Nd Interactivo",
-        "Patrones REE",
-        "TAS",
-        "Clustering"
-    ]
-)
-
-# =========================================================
-# SUBIR EXCEL
-# =========================================================
-
-archivo = st.file_uploader(
-    "Sube tu archivo Excel",
-    type=["xlsx", "xls"]
-)
+archivo = st.file_uploader("Sube tu archivo Excel", type=["xlsx", "xls"])
 
 if archivo is None:
     st.info("Primero sube tu archivo Excel para ver los gráficos y resultados.")
     st.stop()
 
-# =========================================================
-# LEER EXCEL
-# =========================================================
-
 df = pd.read_excel(archivo)
-
 df.columns = df.columns.str.strip()
-
-# =========================================================
-# LIMPIEZA
-# =========================================================
 
 if "Sr" in df.columns:
     df["Sr"] = pd.to_numeric(
@@ -252,21 +151,10 @@ if "Rb" in df.columns:
         errors="coerce"
     )
 
-st.success("¡Excel cargado correctamente!")
+st.success("¡Excel cargado, limpio y listo para hacer ciencia!")
+st.dataframe(df.head(), use_container_width=True)
 
-# =========================================================
-# VISTA PREVIA
-# =========================================================
-
-if seccion == "Vista previa":
-
-    st.markdown('<div class="section-card">', unsafe_allow_html=True)
-
-    st.subheader("Vista previa de datos")
-
-    st.dataframe(df.head(), use_container_width=True)
-
-    st.markdown('</div>', unsafe_allow_html=True)------------
+# -------------------------
 # 1. Diagrama Sr vs Nd (Seaborn)
 # -------------------------
 st.subheader("Diagrama Sr vs Nd")
