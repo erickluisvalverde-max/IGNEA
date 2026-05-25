@@ -408,7 +408,7 @@ if {'Sr87_Sr86', 'Nd143_Nd144', 'Location', 'Sample'}.issubset(df.columns):
 
 st.markdown("""
 <div class="section-card">
-    <h2 class="section-title">Diagrama Sr vs Nd con fondo</h2>
+    <h2 class="section-title">Diagrama Sr vs Nd</h2>
     <p class="section-text">
         Superposición de muestras sobre la base visual isotópica del diagrama Sr-Nd.
     </p>
