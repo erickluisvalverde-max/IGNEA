@@ -11,11 +11,125 @@ import plotly.graph_objects as go
 from PIL import Image
 from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import KMeans
+st.markdown("""
+<style>
+    .stApp {
+        background: linear-gradient(180deg, #f4f7fb 0%, #eaf0f8 100%);
+    }
+
+    .block-container {
+        padding-top: 2rem;
+        padding-bottom: 2rem;
+        padding-left: 2.5rem;
+        padding-right: 2.5rem;
+        max-width: 1400px;
+    }
+
+    h1, h2, h3 {
+        color: #0f172a;
+        font-family: "Segoe UI", sans-serif;
+    }
+
+    .main-title {
+        font-size: 2.2rem;
+        font-weight: 800;
+        color: #0b1f3a;
+        margin-bottom: 0.2rem;
+    }
+
+    .subtitle {
+        font-size: 1.05rem;
+        color: #475569;
+        margin-bottom: 1.5rem;
+    }
+
+    .hero-box {
+        background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%);
+        padding: 1.4rem 1.6rem;
+        border-radius: 18px;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.18);
+        margin-bottom: 1.5rem;
+    }
+
+    .hero-box h1 {
+        color: white !important;
+        margin-bottom: 0.3rem;
+    }
+
+    .hero-box p {
+        color: #dbeafe;
+        margin: 0;
+        font-size: 1rem;
+    }
+
+    .section-card {
+        background: white;
+        border-radius: 18px;
+        padding: 1.2rem 1.2rem 0.8rem 1.2rem;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+        border: 1px solid #e2e8f0;
+        margin-bottom: 1.2rem;
+    }
+
+    div[data-testid="stDataFrame"] {
+        background: white;
+        border-radius: 14px;
+        padding: 0.4rem;
+        border: 1px solid #dbe2ea;
+        box-shadow: 0 4px 14px rgba(0,0,0,0.04);
+    }
+
+    div[data-testid="stPlotlyChart"],
+    div[data-testid="stPyplot"] {
+        background: white;
+        border-radius: 16px;
+        padding: 0.8rem;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 6px 18px rgba(0,0,0,0.05);
+        margin-bottom: 1rem;
+    }
+
+    div[data-testid="stFileUploader"] {
+        background: white;
+        border-radius: 16px;
+        padding: 1rem;
+        border: 1px dashed #94a3b8;
+        box-shadow: 0 6px 18px rgba(0,0,0,0.04);
+    }
+
+    .mini-tag {
+        display: inline-block;
+        background: #dbeafe;
+        color: #1d4ed8;
+        padding: 0.35rem 0.7rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-bottom: 0.8rem;
+    }
+
+    hr {
+        margin-top: 1.8rem;
+        margin-bottom: 1.2rem;
+        border: none;
+        height: 1px;
+        background: linear-gradient(to right, transparent, #94a3b8, transparent);
+    }
+</style>
+""", unsafe_allow_html=True)
 
 st.set_page_config(page_title="Análisis Geoquímico de Galápagos", layout="wide")
 
-st.title("Análisis geoquímico de Galápagos")
-
+st.markdown("""
+<div class="hero-box">
+    <div class="mini-tag">Geoquímica · Visualización · Galápagos</div>
+    <h1 class="main-title">Análisis geoquímico de Galápagos</h1>
+    <p class="subtitle">
+        Plataforma interactiva para explorar relaciones isotópicas, clasificación TAS,
+        tierras raras, fusión parcial y dominios geoquímicos.
+    </p>
+</div>
+""", unsafe_allow_html=True)
 archivo = st.file_uploader("Sube tu archivo Excel", type=["xlsx", "xls"])
 
 if archivo is None:
