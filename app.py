@@ -11,178 +11,62 @@ import plotly.graph_objects as go
 from PIL import Image
 from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import KMeans
+
+# =========================================================
+# CONFIGURACIÓN
+# =========================================================
+
+st.set_page_config(
+    page_title="Análisis Geoquímico de Galápagos",
+    layout="wide"
+)
+
+sns.set_theme(
+    style="whitegrid",
+    context="talk",
+    palette="deep"
+)
+
+# =========================================================
+# ESTILO VISUAL
+# =========================================================
+
 st.markdown("""
 <style>
-    .stApp {
-        background: linear-gradient(180deg, #f4f7fb 0%, #eaf0f8 100%);
-    }
 
-    .block-container {
-        padding-top: 2rem;
-        padding-bottom: 2rem;
-        padding-left: 2.5rem;
-        padding-right: 2.5rem;
-        max-width: 1400px;
-    }
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
-    h1, h2, h3 {
-        color: #0f172a;
-        font-family: "Segoe UI", sans-serif;
-    }
+.stApp {
+    background:
+        radial-gradient(circle at top left, rgba(37,99,235,0.08), transparent 30%),
+        radial-gradient(circle at bottom right, rgba(14,165,233,0.08), transparent 30%),
+        linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
+    font-family: 'Inter', sans-serif;
+}
 
-    .main-title {
-        font-size: 2.2rem;
-        font-weight: 800;
-        color: #0b1f3a;
-        margin-bottom: 0.2rem;
-    }
+.block-container {
+    padding-top: 2rem;
+    padding-bottom: 3rem;
+    padding-left: 3rem;
+    padding-right: 3rem;
+    max-width: 1500px;
+}
 
-    .subtitle {
-        font-size: 1.05rem;
-        color: #475569;
-        margin-bottom: 1.5rem;
-    }
+section[data-testid="stSidebar"] {
+    background: linear-gradient(180deg, #0f172a 0%, #111827 100%);
+}
 
-    .hero-box {
-        background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%);
-        padding: 1.4rem 1.6rem;
-        border-radius: 18px;
-        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.18);
-        margin-bottom: 1.5rem;
-    }
+section[data-testid="stSidebar"] * {
+    color: white !important;
+}
 
-    .hero-box h1 {
-        color: white !important;
-        margin-bottom: 0.3rem;
-    }
+.hero-box {
+    background:
+        linear-gradient(135deg, rgba(15,23,42,0.97), rgba(30,41,59,0.94)),
+        url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=1600');
 
-    .hero-box p {
-        color: #dbeafe;
-        margin: 0;
-        font-size: 1rem;
-    }
-
-    .section-card {
-        background: white;
-        border-radius: 18px;
-        padding: 1.2rem 1.2rem 0.8rem 1.2rem;
-        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
-        border: 1px solid #e2e8f0;
-        margin-bottom: 1.2rem;
-    }
-
-    div[data-testid="stDataFrame"] {
-        background: white;
-        border-radius: 14px;
-        padding: 0.4rem;
-        border: 1px solid #dbe2ea;
-        box-shadow: 0 4px 14px rgba(0,0,0,0.04);
-    }
-
-    div[data-testid="stPlotlyChart"],
-    div[data-testid="stPyplot"] {
-        background: white;
-        border-radius: 16px;
-        padding: 0.8rem;
-        border: 1px solid #e2e8f0;
-        box-shadow: 0 6px 18px rgba(0,0,0,0.05);
-        margin-bottom: 1rem;
-    }
-
-    div[data-testid="stFileUploader"] {
-        background: white;
-        border-radius: 16px;
-        padding: 1rem;
-        border: 1px dashed #94a3b8;
-        box-shadow: 0 6px 18px rgba(0,0,0,0.04);
-    }
-
-    .mini-tag {
-        display: inline-block;
-        background: #dbeafe;
-        color: #1d4ed8;
-        padding: 0.35rem 0.7rem;
-        border-radius: 999px;
-        font-size: 0.85rem;
-        font-weight: 600;
-        margin-bottom: 0.8rem;
-    }
-
-    hr {
-        margin-top: 1.8rem;
-        margin-bottom: 1.2rem;
-        border: none;
-        height: 1px;
-        background: linear-gradient(to right, transparent, #94a3b8, transparent);
-    }
-</style>
-""", unsafe_allow_html=True)
-
-st.set_page_config(page_title="Análisis Geoquímico de Galápagos", layout="wide")
-
-st.markdown("""
-<div class="hero-box">
-    <div class="mini-tag">Geoquímica · Visualización · Galápagos</div>
-    <h1 class="main-title">Análisis geoquímico de Galápagos</h1>
-    <p class="subtitle">
-        Plataforma interactiva para explorar relaciones isotópicas, clasificación TAS,
-        tierras raras, fusión parcial y dominios geoquímicos.
-    </p>
-</div>
-""", unsafe_allow_html=True)
-archivo = st.file_uploader("Sube tu archivo Excel", type=["xlsx", "xls"])
-
-if archivo is None:
-    st.info("Primero sube tu archivo Excel para ver los gráficos y resultados.")
-    st.stop()
-
-df = pd.read_excel(archivo)
-df.columns = df.columns.str.strip()
-
-if "Sr" in df.columns:
-    df["Sr"] = pd.to_numeric(
-        df["Sr"].astype(str).str.replace("*", "", regex=False),
-        errors="coerce"
-    )
-
-if "Rb" in df.columns:
-    df["Rb"] = pd.to_numeric(
-        df["Rb"].astype(str).str.replace("*", "", regex=False),
-        errors="coerce"
-    )
-
-st.success("¡Excel cargado, limpio y listo para hacer ciencia!")
-st.dataframe(df.head(), use_container_width=True)
-
-# -------------------------
-# 1. Diagrama Sr vs Nd (Seaborn)
-# -------------------------
-st.subheader("Diagrama Sr vs Nd")
-
-if {'Sr87_Sr86', 'Nd143_Nd144', 'Location'}.issubset(df.columns):
-    sns.set_theme(style="whitegrid")
-    fig, ax = plt.subplots(figsize=(10, 6))
-
-    sns.scatterplot(
-        data=df.dropna(subset=['Sr87_Sr86', 'Nd143_Nd144', 'Location']),
-        x="Sr87_Sr86",
-        y="Nd143_Nd144",
-        hue="Location",
-        palette="tab10",
-        s=100,
-        edgecolor="black",
-        ax=ax
-    )
-
-    ax.set_title("Sr vs Nd", fontsize=14, fontweight="bold")
-    ax.set_xlabel("87Sr / 86Sr", fontsize=12)
-    ax.set_ylabel("143Nd / 144Nd", fontsize=12)
-    ax.legend(bbox_to_anchor=(1.05, 1), loc="upper left")
-
-    fig.tight_layout()
-    st.pyplot(fig)
-else:
-    st.warning("Faltan columnas para el diagrama Sr vs Nd.")
+    background-size: cover;
+    st.markdown('</div>', unsafe_allow_html=True)
 
 # -------------------------
 # 2. Sr vs Nd interactivo (Plotly)
