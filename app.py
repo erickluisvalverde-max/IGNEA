@@ -174,25 +174,12 @@ st.dataframe(df.head(), use_container_width=True)
 # 1. Diagrama Sr vs Nd
 # =========================================================
 
+st.markdown('<div id="srnd"></div>', unsafe_allow_html=True)
+
 st.markdown("""
-<div id="srnd"></div>
-
 <div class="section-card">
-    <h2 style="
-        margin-top:0;
-        margin-bottom:0.4rem;
-        color:#0f172a;
-        font-size:1.6rem;
-        font-weight:800;
-    ">
-        Diagrama Sr vs Nd
-    </h2>
-
-    <p style="
-        color:#64748b;
-        font-size:0.95rem;
-        margin-bottom:1.2rem;
-    ">
+    <h2>Diagrama Sr vs Nd</h2>
+    <p>
         Relaciones isotópicas entre Sr y Nd para interpretar
         fuentes mantélicas y dominios geoquímicos.
     </p>
