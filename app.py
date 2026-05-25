@@ -637,30 +637,77 @@ else:
 
 st.markdown("</div>", unsafe_allow_html=True)
 
-# -------------------------
+# =========================================================
 # 6. TAS con % de Fusión
-# -------------------------
+# =========================================================
+
+st.markdown('<div id="tas"></div>', unsafe_allow_html=True)
+
+st.markdown("""
+<div class="section-card">
+    <h2 style="
+        margin-top:0;
+        margin-bottom:0.4rem;
+        color:#0f172a;
+        font-size:1.6rem;
+        font-weight:800;
+    ">
+        TAS con % de Fusión Parcial
+    </h2>
+
+    <p style="
+        color:#64748b;
+        font-size:0.95rem;
+        margin-bottom:0;
+    ">
+        Clasificación TAS integrada con estimaciones de
+        fusión parcial y dominios geoquímicos.
+    </p>
+</div>
+""", unsafe_allow_html=True)
+
 if {'SiO2', 'Na2O', 'K2O', 'La', 'Location', 'Sample'}.issubset(df.columns):
-    df_fusion = df.dropna(subset=['La', 'SiO2', 'Na2O', 'K2O', 'Location', 'Sample']).copy()
+
+    df_fusion = df.dropna(
+        subset=['La', 'SiO2', 'Na2O', 'K2O', 'Location', 'Sample']
+    ).copy()
 
     if not df_fusion.empty:
+
         C0_La = 0.687
         D_La = 0.01
 
-        df_fusion['F_fraccion'] = (C0_La / df_fusion['La'] - D_La) / (1 - D_La)
-        df_fusion['F_porcentaje'] = (df_fusion['F_fraccion'] * 100).clip(lower=0.1, upper=30)
+        df_fusion['F_fraccion'] = (
+            (C0_La / df_fusion['La']) - D_La
+        ) / (1 - D_La)
+
+        df_fusion['F_porcentaje'] = (
+            df_fusion['F_fraccion'] * 100
+        ).clip(lower=0.1, upper=30)
 
         occidental = [
-            'Isla Fernandina', 'Isla Isabela', 'Volcan Wolf', 'Volcan Darwin',
-            'Volcan Alcedo', 'Sierra Negra', 'Cerro Azul', 'Volcan Ecuador',
-            'Isla Tortuga', 'Roca Redonda'
+            'Isla Fernandina',
+            'Isla Isabela',
+            'Volcan Wolf',
+            'Volcan Darwin',
+            'Volcan Alcedo',
+            'Sierra Negra',
+            'Cerro Azul',
+            'Volcan Ecuador',
+            'Isla Tortuga',
+            'Roca Redonda'
         ]
 
         df_fusion['Region'] = df_fusion['Location'].apply(
-            lambda x: 'Occidental (Pluma Activa)' if x in occidental else 'Central / Oriental'
+            lambda x:
+            'Occidental (Pluma Activa)'
+            if x in occidental
+            else 'Central / Oriental'
         )
 
-        df_fusion['Alkalis'] = df_fusion['Na2O'] + df_fusion['K2O']
+        df_fusion['Alkalis'] = (
+            df_fusion['Na2O'] + df_fusion['K2O']
+        )
 
         fig = px.scatter(
             df_fusion,
@@ -671,7 +718,7 @@ if {'SiO2', 'Na2O', 'K2O', 'La', 'Location', 'Sample'}.issubset(df.columns):
             symbol='Region',
             hover_name='Sample',
             hover_data=['Location', 'La'],
-            title='Clasificación TAS con los % de Fusión Parcial',
+            title='Clasificación TAS con % de Fusión Parcial',
             labels={
                 'SiO2': 'SiO2 (wt%)',
                 'Alkalis': 'Na2O + K2O (wt%)',
@@ -682,9 +729,13 @@ if {'SiO2', 'Na2O', 'K2O', 'La', 'Location', 'Sample'}.issubset(df.columns):
         )
 
         ruta_imagen_tas = "Diagrama tas.png"
+
         if os.path.exists(ruta_imagen_tas):
+
             with open(ruta_imagen_tas, "rb") as image_file:
-                encoded_string = base64.b64encode(image_file.read()).decode()
+                encoded_string = base64.b64encode(
+                    image_file.read()
+                ).decode()
 
             img_str = f"data:image/png;base64,{encoded_string}"
 
@@ -710,21 +761,43 @@ if {'SiO2', 'Na2O', 'K2O', 'La', 'Location', 'Sample'}.issubset(df.columns):
             plot_bgcolor='rgba(0,0,0,0)',
             coloraxis_colorbar=dict(title="Fusión (%)"),
             width=950,
-            height=600
+            height=600,
+            title_x=0.02,
+            title_font_size=22
         )
 
         fig.update_traces(
             marker=dict(
                 size=12,
-                line=dict(width=1, color='black')
+                line=dict(
+                    width=1,
+                    color='black'
+                )
             ),
             selector=dict(mode='markers')
         )
 
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(
+            fig,
+            use_container_width=True
+        )
+
+        st.markdown("""
+        <div class="section-card">
+            <h3 style="
+                margin-top:0;
+                color:#0f172a;
+                font-size:1.25rem;
+                font-weight:700;
+            ">
+                Promedio de fusión parcial por isla
+            </h3>
+        </div>
+        """, unsafe_allow_html=True)
 
         resumen_fusion = (
-            df_fusion.groupby('Location')['F_porcentaje']
+            df_fusion
+            .groupby('Location')['F_porcentaje']
             .mean()
             .sort_values(ascending=False)
             .reset_index()
@@ -738,11 +811,23 @@ if {'SiO2', 'Na2O', 'K2O', 'La', 'Location', 'Sample'}.issubset(df.columns):
             inplace=True
         )
 
-        resumen_fusion['Fusión Parcial Promedio (%)'] = resumen_fusion['Fusión Parcial Promedio (%)'].round(2)
+        resumen_fusion[
+            'Fusión Parcial Promedio (%)'
+        ] = resumen_fusion[
+            'Fusión Parcial Promedio (%)'
+        ].round(2)
 
-        st.subheader("Promedio de fusión parcial por isla")
-        st.dataframe(resumen_fusion, use_container_width=True)
+        st.dataframe(
+            resumen_fusion,
+            use_container_width=True
+        )
 
+else:
+    st.warning(
+        "Faltan columnas necesarias para el TAS con fusión parcial."
+    )
+
+# -------------------------
 # -------------------------
 # 7. TAS + Fusión Parcial con línea alcalina interactiva
 # -------------------------
@@ -864,17 +949,56 @@ if {'SiO2', 'Na2O', 'K2O', 'Sample', 'Location'}.issubset(df.columns):
 
         st.plotly_chart(fig, use_container_width=True)
 
-# -------------------------
+# =========================================================
 # 9. Clustering K-Means
-# -------------------------
-columnas_ml = ['Sr87_Sr86', 'Nd143_Nd144', 'La', 'Sm', 'Yb']
+# =========================================================
+
+st.markdown('<div id="clustering"></div>', unsafe_allow_html=True)
+
+st.markdown("""
+<div class="section-card">
+    <h2 style="
+        margin-top:0;
+        margin-bottom:0.4rem;
+        color:#0f172a;
+        font-size:1.6rem;
+        font-weight:800;
+    ">
+        Clustering Geoquímico K-Means
+    </h2>
+
+    <p style="
+        color:#64748b;
+        font-size:0.95rem;
+        margin-bottom:0;
+    ">
+        Agrupamiento geoquímico automático basado en
+        relaciones isotópicas y elementos REE para
+        interpretar dominios mantélicos.
+    </p>
+</div>
+""", unsafe_allow_html=True)
+
+columnas_ml = [
+    'Sr87_Sr86',
+    'Nd143_Nd144',
+    'La',
+    'Sm',
+    'Yb'
+]
 
 if set(columnas_ml).issubset(df.columns):
-    df_ml = df.dropna(subset=columnas_ml).copy()
+
+    df_ml = df.dropna(
+        subset=columnas_ml
+    ).copy()
 
     if len(df_ml) >= 3:
+
         X = df_ml[columnas_ml]
+
         scaler = StandardScaler()
+
         X_escalado = scaler.fit_transform(X)
 
         kmeans = KMeans(
@@ -883,8 +1007,14 @@ if set(columnas_ml).issubset(df.columns):
             n_init=10
         )
 
-        df_ml['Cluster_IA'] = kmeans.fit_predict(X_escalado)
-        df_ml['Cluster_IA'] = 'Grupo Químico ' + df_ml['Cluster_IA'].astype(str)
+        df_ml['Cluster_IA'] = kmeans.fit_predict(
+            X_escalado
+        )
+
+        df_ml['Cluster_IA'] = (
+            'Grupo Químico '
+            + df_ml['Cluster_IA'].astype(str)
+        )
 
         nombres_geologicos = {
             'Grupo Químico 0': 'OIB',
@@ -892,7 +1022,10 @@ if set(columnas_ml).issubset(df.columns):
             'Grupo Químico 2': 'Zona de Transición'
         }
 
-        df_ml['Interpretacion_Geologica'] = df_ml['Cluster_IA'].map(nombres_geologicos)
+        df_ml['Interpretacion_Geologica'] = (
+            df_ml['Cluster_IA']
+            .map(nombres_geologicos)
+        )
 
         fig = px.scatter(
             df_ml,
@@ -918,11 +1051,242 @@ if set(columnas_ml).issubset(df.columns):
         fig.update_traces(
             marker=dict(
                 size=14,
-                line=dict(width=1, color='black')
+                line=dict(
+                    width=1,
+                    color='black'
+                )
             ),
             selector=dict(mode='markers')
         )
 
-        st.plotly_chart(fig, use_container_width=True)
+        fig.update_layout(
+            width=950,
+            height=600,
+            title_x=0.02,
+            title_font_size=22,
+            legend_title='Interpretación'
+        )
+
+        st.plotly_chart(
+            fig,
+            use_container_width=True
+        )
+
+        st.markdown("""
+        <div class="section-card">
+            <h3 style="
+                margin-top:0;
+                color:#0f172a;
+                font-size:1.25rem;
+                font-weight:700;
+            ">
+                Resumen de agrupamientos geoquímicos
+            </h3>
+        </div>
+        """, unsafe_allow_html=True)
+
+        resumen_clusters = (
+            df_ml[
+                [
+                    'Sample',
+                    'Location',
+                    'Interpretacion_Geologica'
+                ]
+            ]
+            .rename(
+                columns={
+                    'Sample': 'Muestra',
+                    'Location': 'Localidad',
+                    'Interpretacion_Geologica': 'Dominio Geoquímico'
+                }
+            )
+        )
+
+        st.dataframe(
+            resumen_clusters,
+            use_container_width=True
+        )
+
     else:
-        st.warning("No hay suficientes muestras para ejecutar K-Means con 3 clústeres.")
+
+        st.warning(
+            "No hay suficientes muestras para ejecutar K-Means con 3 clústeres."
+        )
+
+else:
+
+    st.warning(
+        "Faltan columnas necesarias para ejecutar el clustering geoquímico."
+    )
+
+# =========================================================
+# 9. Clustering K-Means
+# =========================================================
+
+st.markdown('<div id="clustering"></div>', unsafe_allow_html=True)
+
+st.markdown("""
+<div class="section-card">
+    <h2 style="
+        margin-top:0;
+        margin-bottom:0.4rem;
+        color:#0f172a;
+        font-size:1.6rem;
+        font-weight:800;
+    ">
+        Clustering Geoquímico K-Means
+    </h2>
+
+    <p style="
+        color:#64748b;
+        font-size:0.95rem;
+        margin-bottom:0;
+    ">
+        Agrupamiento geoquímico automático basado en
+        relaciones isotópicas y elementos REE para
+        interpretar dominios mantélicos.
+    </p>
+</div>
+""", unsafe_allow_html=True)
+
+columnas_ml = [
+    'Sr87_Sr86',
+    'Nd143_Nd144',
+    'La',
+    'Sm',
+    'Yb'
+]
+
+if set(columnas_ml).issubset(df.columns):
+
+    df_ml = df.dropna(
+        subset=columnas_ml
+    ).copy()
+
+    if len(df_ml) >= 3:
+
+        X = df_ml[columnas_ml]
+
+        scaler = StandardScaler()
+
+        X_escalado = scaler.fit_transform(X)
+
+        kmeans = KMeans(
+            n_clusters=3,
+            random_state=42,
+            n_init=10
+        )
+
+        df_ml['Cluster_IA'] = kmeans.fit_predict(
+            X_escalado
+        )
+
+        df_ml['Cluster_IA'] = (
+            'Grupo Químico '
+            + df_ml['Cluster_IA'].astype(str)
+        )
+
+        nombres_geologicos = {
+            'Grupo Químico 0': 'OIB',
+            'Grupo Químico 1': 'MORB',
+            'Grupo Químico 2': 'Zona de Transición'
+        }
+
+        df_ml['Interpretacion_Geologica'] = (
+            df_ml['Cluster_IA']
+            .map(nombres_geologicos)
+        )
+
+        fig = px.scatter(
+            df_ml,
+            x='Sr87_Sr86',
+            y='Nd143_Nd144',
+            color='Interpretacion_Geologica',
+            hover_name='Sample',
+            hover_data=['Location'],
+            title='Fuente Mantélica',
+            labels={
+                'Sr87_Sr86': '87Sr / 86Sr',
+                'Nd143_Nd144': '143Nd / 144Nd',
+                'Interpretacion_Geologica': 'Dominio del Manto'
+            },
+            template='plotly_white',
+            color_discrete_map={
+                'OIB': 'red',
+                'MORB': 'blue',
+                'Zona de Transición': 'orange'
+            }
+        )
+
+        fig.update_traces(
+            marker=dict(
+                size=14,
+                line=dict(
+                    width=1,
+                    color='black'
+                )
+            ),
+            selector=dict(mode='markers')
+        )
+
+        fig.update_layout(
+            width=950,
+            height=600,
+            title_x=0.02,
+            title_font_size=22,
+            legend_title='Interpretación'
+        )
+
+        st.plotly_chart(
+            fig,
+            use_container_width=True
+        )
+
+        st.markdown("""
+        <div class="section-card">
+            <h3 style="
+                margin-top:0;
+                color:#0f172a;
+                font-size:1.25rem;
+                font-weight:700;
+            ">
+                Resumen de agrupamientos geoquímicos
+            </h3>
+        </div>
+        """, unsafe_allow_html=True)
+
+        resumen_clusters = (
+            df_ml[
+                [
+                    'Sample',
+                    'Location',
+                    'Interpretacion_Geologica'
+                ]
+            ]
+            .rename(
+                columns={
+                    'Sample': 'Muestra',
+                    'Location': 'Localidad',
+                    'Interpretacion_Geologica': 'Dominio Geoquímico'
+                }
+            )
+        )
+
+        st.dataframe(
+            resumen_clusters,
+            use_container_width=True
+        )
+
+    else:
+
+        st.warning(
+            "No hay suficientes muestras para ejecutar K-Means con 3 clústeres."
+        )
+
+else:
+
+    st.warning(
+        "Faltan columnas necesarias para ejecutar el clustering geoquímico."
+    )
+
+# -------------------------
