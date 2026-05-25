@@ -465,7 +465,7 @@ st.markdown("""
     <h2 class="section-title">La/Sm vs Sm/Yb</h2>
     <p class="section-text">
         Variaciones geoquímicas de elementos de tierras raras
-        para interpretar enriquecimiento mantelico y profundidad de fusion.
+        para interpretar enriquecimiento mantélico y profundidad de fusión.
     </p>
 </div>
 """, unsafe_allow_html=True)
@@ -503,52 +503,26 @@ if {'La', 'Sm', 'Yb', 'Location', 'Sample'}.issubset(df.columns):
 
         fig.update_layout(
             height=620,
-            paper_bgcolor='white',
+            paper_bgcolor='rgba(0,0,0,0)',
             plot_bgcolor='white',
-            font=dict(
-                family='Segoe UI',
-                size=13,
-                color='#0f172a'
-            ),
+            font=dict(family='Segoe UI', size=13, color='#0f172a'),
             legend=dict(
                 title='Localidad',
-                bgcolor='rgba(255,255,255,1)',
-                bordercolor='#94a3b8',
-                borderwidth=1,
-                font=dict(
-                    color='#0f172a',
-                    size=12
-                )
+                bgcolor='rgba(255,255,255,0.85)',
+                bordercolor='#cbd5e1',
+                borderwidth=1
             ),
-            margin=dict(
-                l=40,
-                r=40,
-                t=30,
-                b=40
-            )
+            margin=dict(l=40, r=40, t=30, b=40)
         )
 
-        fig.update_xaxes(
-            showgrid=True,
-            gridcolor='rgba(148,163,184,0.25)',
-            zeroline=False,
-            showline=True,
-            linewidth=1,
-            linecolor='#94a3b8'
-        )
-
-        fig.update_yaxes(
-            showgrid=True,
-            gridcolor='rgba(148,163,184,0.25)',
-            zeroline=False,
-            showline=True,
-            linewidth=1,
-            linecolor='#94a3b8'
-        )
+        fig.update_xaxes(showgrid=True, gridcolor='rgba(148,163,184,0.25)', zeroline=False)
+        fig.update_yaxes(showgrid=True, gridcolor='rgba(148,163,184,0.25)', zeroline=False)
 
         st.plotly_chart(fig, use_container_width=True)
 else:
     st.warning("Faltan columnas necesarias para el diagrama La/Sm vs Sm/Yb.")
+
+
 
 # =========================================================
 # 5. Patrones REE OIB y MORB
