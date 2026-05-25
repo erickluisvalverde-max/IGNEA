@@ -11,6 +11,9 @@ import plotly.graph_objects as go
 from PIL import Image
 from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import KMeans
+
+st.set_page_config(page_title="Análisis Geoquímico de Galápagos", layout="wide")
+
 st.markdown("""
 <style>
     .stApp {
@@ -33,14 +36,14 @@ st.markdown("""
     .main-title {
         font-size: 2.2rem;
         font-weight: 800;
-        color: #0b1f3a;
+        color: #ffffff;
         margin-bottom: 0.2rem;
     }
 
     .subtitle {
-        font-size: 1.05rem;
-        color: #475569;
-        margin-bottom: 1.5rem;
+        font-size: 1.02rem;
+        color: #dbeafe;
+        margin-bottom: 0;
     }
 
     .hero-box {
@@ -51,21 +54,21 @@ st.markdown("""
         margin-bottom: 1.5rem;
     }
 
-    .hero-box h1 {
-        color: white !important;
-        margin-bottom: 0.3rem;
-    }
-
-    .hero-box p {
-        color: #dbeafe;
-        margin: 0;
-        font-size: 1rem;
+    .mini-tag {
+        display: inline-block;
+        background: #dbeafe;
+        color: #1d4ed8;
+        padding: 0.35rem 0.7rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-bottom: 0.8rem;
     }
 
     .section-card {
         background: white;
         border-radius: 18px;
-        padding: 1.2rem 1.2rem 0.8rem 1.2rem;
+        padding: 1.1rem 1.1rem 0.8rem 1.1rem;
         box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
         border: 1px solid #e2e8f0;
         margin-bottom: 1.2rem;
@@ -95,17 +98,11 @@ st.markdown("""
         padding: 1rem;
         border: 1px dashed #94a3b8;
         box-shadow: 0 6px 18px rgba(0,0,0,0.04);
+        margin-bottom: 1.2rem;
     }
 
-    .mini-tag {
-        display: inline-block;
-        background: #dbeafe;
-        color: #1d4ed8;
-        padding: 0.35rem 0.7rem;
-        border-radius: 999px;
-        font-size: 0.85rem;
-        font-weight: 600;
-        margin-bottom: 0.8rem;
+    div[data-testid="stAlert"] {
+        border-radius: 14px;
     }
 
     hr {
@@ -118,18 +115,17 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-st.set_page_config(page_title="Análisis Geoquímico de Galápagos", layout="wide")
-
 st.markdown("""
 <div class="hero-box">
     <div class="mini-tag">Geoquímica · Visualización · Galápagos</div>
-    <h1 class="main-title">Análisis geoquímico de Galápagos</h1>
+    <div class="main-title">Análisis geoquímico de Galápagos</div>
     <p class="subtitle">
         Plataforma interactiva para explorar relaciones isotópicas, clasificación TAS,
         tierras raras, fusión parcial y dominios geoquímicos.
     </p>
 </div>
 """, unsafe_allow_html=True)
+
 archivo = st.file_uploader("Sube tu archivo Excel", type=["xlsx", "xls"])
 
 if archivo is None:
@@ -152,11 +148,16 @@ if "Rb" in df.columns:
     )
 
 st.success("¡Excel cargado, limpio y listo para hacer ciencia!")
+
+st.markdown('<div class="section-card">', unsafe_allow_html=True)
+st.subheader("Vista previa de datos")
 st.dataframe(df.head(), use_container_width=True)
+st.markdown('</div>', unsafe_allow_html=True)
 
 # -------------------------
 # 1. Diagrama Sr vs Nd (Seaborn)
 # -------------------------
+st.markdown('<div class="section-card">', unsafe_allow_html=True)
 st.subheader("Diagrama Sr vs Nd")
 
 if {'Sr87_Sr86', 'Nd143_Nd144', 'Location'}.issubset(df.columns):
@@ -183,11 +184,15 @@ if {'Sr87_Sr86', 'Nd143_Nd144', 'Location'}.issubset(df.columns):
     st.pyplot(fig)
 else:
     st.warning("Faltan columnas para el diagrama Sr vs Nd.")
+st.markdown('</div>', unsafe_allow_html=True)
 
 # -------------------------
 # 2. Sr vs Nd interactivo (Plotly)
 # -------------------------
 if {'Sr87_Sr86', 'Nd143_Nd144', 'Location', 'Sample'}.issubset(df.columns):
+    st.markdown('<div class="section-card">', unsafe_allow_html=True)
+    st.subheader("Sr vs Nd interactivo")
+
     hover_cols = [c for c in ['SiO2', 'MgO', 'La', 'Yb'] if c in df.columns]
 
     fig = px.scatter(
@@ -214,10 +219,12 @@ if {'Sr87_Sr86', 'Nd143_Nd144', 'Location', 'Sample'}.issubset(df.columns):
     )
 
     st.plotly_chart(fig, use_container_width=True)
+    st.markdown('</div>', unsafe_allow_html=True)
 
 # -------------------------
 # 3. Sr vs Nd con imagen de fondo
 # -------------------------
+st.markdown('<div class="section-card">', unsafe_allow_html=True)
 st.subheader("Diagrama Sr vs Nd con fondo")
 
 if {'Sr87_Sr86', 'Nd143_Nd144', 'Location'}.issubset(df.columns):
@@ -258,11 +265,15 @@ if {'Sr87_Sr86', 'Nd143_Nd144', 'Location'}.issubset(df.columns):
         st.pyplot(fig)
     else:
         st.warning("No se encontró la imagen SRvsND.png.png.")
+st.markdown('</div>', unsafe_allow_html=True)
 
 # -------------------------
 # 4. La/Sm vs Sm/Yb (Plotly)
 # -------------------------
 if {'La', 'Sm', 'Yb', 'Location', 'Sample'}.issubset(df.columns):
+    st.markdown('<div class="section-card">', unsafe_allow_html=True)
+    st.subheader("La/Sm vs Sm/Yb")
+
     df_ree = df.dropna(subset=['La', 'Sm', 'Yb']).copy()
 
     if not df_ree.empty:
@@ -293,6 +304,7 @@ if {'La', 'Sm', 'Yb', 'Location', 'Sample'}.issubset(df.columns):
         )
 
         st.plotly_chart(fig, use_container_width=True)
+    st.markdown('</div>', unsafe_allow_html=True)
 
 # -------------------------
 # 5. OIB y MORB
@@ -321,6 +333,9 @@ morb_ref = {
 elementos_ree = list(condrito.keys())
 
 if nombre_columna_localidad in df.columns and nombre_columna_muestra in df.columns:
+    st.markdown('<div class="section-card">', unsafe_allow_html=True)
+    st.subheader("Patrones REE: OIB y MORB")
+
     df_spider = df.copy()
 
     for col in elementos_ree:
@@ -390,6 +405,7 @@ if nombre_columna_localidad in df.columns and nombre_columna_muestra in df.colum
         )
 
         st.plotly_chart(fig, use_container_width=True)
+    st.markdown('</div>', unsafe_allow_html=True)
 
 # -------------------------
 # 6. TAS con % de Fusión
@@ -398,6 +414,9 @@ if {'SiO2', 'Na2O', 'K2O', 'La', 'Location', 'Sample'}.issubset(df.columns):
     df_fusion = df.dropna(subset=['La', 'SiO2', 'Na2O', 'K2O', 'Location', 'Sample']).copy()
 
     if not df_fusion.empty:
+        st.markdown('<div class="section-card">', unsafe_allow_html=True)
+        st.subheader("Clasificación TAS con % de Fusión")
+
         C0_La = 0.687
         D_La = 0.01
 
@@ -496,6 +515,7 @@ if {'SiO2', 'Na2O', 'K2O', 'La', 'Location', 'Sample'}.issubset(df.columns):
 
         st.subheader("Promedio de fusión parcial por isla")
         st.dataframe(resumen_fusion, use_container_width=True)
+        st.markdown('</div>', unsafe_allow_html=True)
 
 # -------------------------
 # 7. TAS + Fusión Parcial con línea alcalina interactiva
@@ -504,6 +524,9 @@ if {'SiO2', 'Na2O', 'K2O', 'La', 'Sample', 'Location'}.issubset(df.columns):
     df_tas = df.dropna(subset=['SiO2', 'Na2O', 'K2O', 'La', 'Sample', 'Location']).copy()
 
     if not df_tas.empty:
+        st.markdown('<div class="section-card">', unsafe_allow_html=True)
+        st.subheader("TAS + Fusión Parcial")
+
         df_tas['Alkalis'] = df_tas['Na2O'] + df_tas['K2O']
 
         C0_La = 0.687
@@ -556,6 +579,7 @@ if {'SiO2', 'Na2O', 'K2O', 'La', 'Sample', 'Location'}.issubset(df.columns):
         fig.update_yaxes(showgrid=True, gridcolor='lightgray')
 
         st.plotly_chart(fig, use_container_width=True)
+        st.markdown('</div>', unsafe_allow_html=True)
 
 # -------------------------
 # 8. TAS y Evolución Magmática
@@ -564,6 +588,9 @@ if {'SiO2', 'Na2O', 'K2O', 'Sample', 'Location'}.issubset(df.columns):
     df_tas2 = df.dropna(subset=['SiO2', 'Na2O', 'K2O', 'Sample', 'Location']).copy()
 
     if not df_tas2.empty:
+        st.markdown('<div class="section-card">', unsafe_allow_html=True)
+        st.subheader("TAS y Evolución Magmática")
+
         df_tas2['Alkalis'] = df_tas2['Na2O'] + df_tas2['K2O']
 
         fig = px.scatter(
@@ -617,6 +644,7 @@ if {'SiO2', 'Na2O', 'K2O', 'Sample', 'Location'}.issubset(df.columns):
         )
 
         st.plotly_chart(fig, use_container_width=True)
+        st.markdown('</div>', unsafe_allow_html=True)
 
 # -------------------------
 # 9. Clustering K-Means
@@ -627,6 +655,9 @@ if set(columnas_ml).issubset(df.columns):
     df_ml = df.dropna(subset=columnas_ml).copy()
 
     if len(df_ml) >= 3:
+        st.markdown('<div class="section-card">', unsafe_allow_html=True)
+        st.subheader("Clustering K-Means")
+
         X = df_ml[columnas_ml]
         scaler = StandardScaler()
         X_escalado = scaler.fit_transform(X)
@@ -678,5 +709,6 @@ if set(columnas_ml).issubset(df.columns):
         )
 
         st.plotly_chart(fig, use_container_width=True)
+        st.markdown('</div>', unsafe_allow_html=True)
     else:
         st.warning("No hay suficientes muestras para ejecutar K-Means con 3 clústeres.")
