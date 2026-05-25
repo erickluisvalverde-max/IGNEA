@@ -558,7 +558,7 @@ st.markdown("""
 <div class="section-card">
     <h2 class="section-title">Patrones REE OIB y MORB</h2>
     <p class="section-text">
-        Comparación de patrones de tierras raras normalizados a condrito
+        Comparacion de patrones de tierras raras normalizados a condrito
         para identificar afinidades tipo OIB y MORB.
     </p>
 </div>
@@ -622,9 +622,9 @@ if nombre_columna_localidad in df.columns and nombre_columna_muestra in df.colum
         )
 
         fig.update_traces(
-            line=dict(width=1.8),
-            opacity=0.80,
-            marker=dict(size=6)
+            line=dict(width=1.3),
+            opacity=0.60,
+            marker=dict(size=5)
         )
 
         oib_norm = [oib_ref[e] / condrito[e] for e in ree_disponibles]
@@ -653,45 +653,25 @@ if nombre_columna_localidad in df.columns and nombre_columna_muestra in df.colum
             paper_bgcolor='white',
             plot_bgcolor='white',
             hovermode='closest',
-            font=dict(
-                family='Segoe UI',
-                size=13,
-                color='#0f172a'
-            ),
+            font=dict(family='Segoe UI', size=13, color='#0f172a'),
             legend=dict(
                 title='Localidad',
-                bgcolor='rgba(255,255,255,1)',
-                bordercolor='#94a3b8',
+                bgcolor='white',
+                bordercolor='#cbd5e1',
                 borderwidth=1,
-                font=dict(
-                    color='#0f172a',
-                    size=12
-                )
+                font=dict(color='#0f172a', size=12)
             ),
             margin=dict(l=40, r=40, t=30, b=40),
             xaxis_title='Elementos de Tierras Raras (LREE -> HREE)',
             yaxis_title='Muestra / Condrito'
         )
 
-        fig.update_xaxes(
-            showgrid=False,
-            showline=True,
-            linewidth=1,
-            linecolor='#94a3b8'
-        )
-
-        fig.update_yaxes(
-            showgrid=True,
-            gridcolor='rgba(148,163,184,0.25)',
-            showline=True,
-            linewidth=1,
-            linecolor='#94a3b8'
-        )
+        fig.update_xaxes(showgrid=False)
+        fig.update_yaxes(showgrid=True, gridcolor='rgba(148,163,184,0.25)')
 
         st.plotly_chart(fig, use_container_width=True)
 else:
     st.warning("Faltan columnas necesarias para generar patrones REE.")
-
 
 # =========================================================
 # 6. TAS con % de Fusión
