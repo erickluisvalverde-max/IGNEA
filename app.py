@@ -1,4 +1,5 @@
-import os
+
+# -------------import os
 import base64
 import numpy as np
 import pandas as pd
@@ -8,9 +9,23 @@ import matplotlib.image as mpimg
 import seaborn as sns
 import plotly.express as px
 import plotly.graph_objects as go
+
 from PIL import Image
 from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import KMeans
+
+# =========================================================
+# CONFIGURACIÓN STREAMLIT
+# =========================================================
+
+st.set_page_config(
+    page_title="Análisis Geoquímico de Galápagos",
+    layout="wide"
+)
+
+# =========================================================
+# TEMA GENERAL
+# =========================================================
 
 sns.set_theme(
     style="whitegrid",
@@ -18,19 +33,28 @@ sns.set_theme(
     palette="deep"
 )
 
+# =========================================================
+# CSS PROFESIONAL
+# =========================================================
+
 st.markdown("""
 <style>
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
+html, body, [class*="css"]  {
+    font-family: 'Inter', sans-serif;
+}
+
+/* FONDO */
 .stApp {
     background:
         radial-gradient(circle at top left, rgba(37,99,235,0.08), transparent 30%),
         radial-gradient(circle at bottom right, rgba(14,165,233,0.08), transparent 30%),
         linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
-    font-family: 'Inter', sans-serif;
 }
 
+/* CONTENEDOR */
 .block-container {
     padding-top: 2rem;
     padding-bottom: 3rem;
@@ -39,6 +63,7 @@ st.markdown("""
     max-width: 1500px;
 }
 
+/* SIDEBAR */
 section[data-testid="stSidebar"] {
     background: linear-gradient(180deg, #0f172a 0%, #111827 100%);
 }
@@ -47,15 +72,13 @@ section[data-testid="stSidebar"] * {
     color: white !important;
 }
 
+/* HERO */
 .hero-box {
+
     background:
-        linear-gradient(135deg, rgba(15,23,42,0.97), rgba(30,41,59,0.94)),
-        url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=1600');
+        linear-gradient(135deg, rgba(15,23,42,0.95), rgba(30,41,59,0.92));
 
-    background-size: cover;
-    background-position: center;
-
-    padding: 2.2rem;
+    padding: 2.5rem;
 
     border-radius: 30px;
 
@@ -64,27 +87,14 @@ section[data-testid="stSidebar"] * {
 
     margin-bottom: 2rem;
 
-    position: relative;
-    overflow: hidden;
-}
-
-.hero-box::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: rgba(15,23,42,0.55);
-    backdrop-filter: blur(4px);
-}
-
-.hero-box * {
-    position: relative;
-    z-index: 2;
+    border: 1px solid rgba(255,255,255,0.06);
 }
 
 .main-title {
     font-size: 3rem;
     font-weight: 800;
     color: white;
+    margin-bottom: 0.5rem;
 }
 
 .subtitle {
@@ -105,9 +115,9 @@ section[data-testid="stSidebar"] * {
     margin-bottom: 1rem;
 }
 
+/* TARJETAS */
 .section-card {
-    background: rgba(255,255,255,0.74);
-    backdrop-filter: blur(14px);
+    background: rgba(255,255,255,0.85);
     border-radius: 24px;
     padding: 1.5rem;
     border: 1px solid rgba(255,255,255,0.5);
@@ -115,45 +125,51 @@ section[data-testid="stSidebar"] * {
     margin-bottom: 1.6rem;
 }
 
-.section-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 14px 40px rgba(15,23,42,0.10);
-}
-
+/* TITULOS */
 h1, h2, h3 {
     color: #0f172a;
     font-weight: 700;
 }
 
+/* DATAFRAME */
 div[data-testid="stDataFrame"] {
     border-radius: 18px;
     overflow: hidden;
-    border: 1px solid rgba(148,163,184,0.18);
-    box-shadow: 0 4px 20px rgba(15,23,42,0.05);
 }
 
+/* GRAFICOS */
 div[data-testid="stPlotlyChart"],
 div[data-testid="stPyplot"] {
-    background: rgba(255,255,255,0.86);
+
+    background: rgba(255,255,255,0.92);
+
     border-radius: 22px;
+
     padding: 1rem;
+
     border: 1px solid rgba(255,255,255,0.5);
-    box-shadow: 0 8px 30px rgba(15,23,42,0.06);
+
+    box-shadow:
+        0 8px 30px rgba(15,23,42,0.06);
+
     margin-top: 1rem;
     margin-bottom: 1rem;
 }
 
+/* FILE UPLOADER */
 div[data-testid="stFileUploader"] {
-    background: rgba(255,255,255,0.82);
-    border-radius: 24px;
-    padding: 1.5rem;
+
+    background: rgba(255,255,255,0.9);
+
+    border-radius: 20px;
+
+    padding: 1rem;
+
     border: 2px dashed #94a3b8;
-    box-shadow: 0 8px 24px rgba(15,23,42,0.05);
 }
 
 </style>
 """, unsafe_allow_html=True)
-st.set_page_config(page_title="Análisis Geoquímico de Galápagos", layout="wide")
 
 # =========================================================
 # HERO PRINCIPAL
@@ -172,7 +188,7 @@ st.markdown("""
 
     <p class="subtitle">
         Plataforma interactiva para explorar relaciones isotópicas,
-        patrones REE, clasificación TAS,
+        clasificación TAS, patrones REE,
         fusión parcial y dominios geoquímicos.
     </p>
 
@@ -180,44 +196,49 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # =========================================================
-# MENÚ LATERAL
+# SIDEBAR
 # =========================================================
 
 st.sidebar.title("Panel Geoquímico")
 
 st.sidebar.markdown("---")
 
-st.sidebar.markdown("""
-### Navegación
+seccion = st.sidebar.radio(
+    "Navegación",
+    [
+        "Vista previa",
+        "Sr vs Nd",
+        "Sr vs Nd Interactivo",
+        "Patrones REE",
+        "TAS",
+        "Clustering"
+    ]
+)
 
-- Sr vs Nd
-- Patrones REE
-- TAS
-- Fusión Parcial
-- Clustering
-""")
-st.sidebar.title("Panel Geoquímico")
+# =========================================================
+# SUBIR EXCEL
+# =========================================================
 
-st.sidebar.markdown("---")
-
-st.sidebar.markdown("""
-### Herramientas
-
-- Isótopos Sr-Nd
-- Diagramas TAS
-- Patrones REE
-- Fusión parcial
-- Clustering geoquímico
-- Visualización interactiva
-""")
-archivo = st.file_uploader("Sube tu archivo Excel", type=["xlsx", "xls"])
+archivo = st.file_uploader(
+    "Sube tu archivo Excel",
+    type=["xlsx", "xls"]
+)
 
 if archivo is None:
     st.info("Primero sube tu archivo Excel para ver los gráficos y resultados.")
     st.stop()
 
+# =========================================================
+# LEER EXCEL
+# =========================================================
+
 df = pd.read_excel(archivo)
+
 df.columns = df.columns.str.strip()
+
+# =========================================================
+# LIMPIEZA
+# =========================================================
 
 if "Sr" in df.columns:
     df["Sr"] = pd.to_numeric(
@@ -231,10 +252,21 @@ if "Rb" in df.columns:
         errors="coerce"
     )
 
-st.success("¡Excel cargado, limpio y listo para hacer ciencia!")
-st.dataframe(df.head(), use_container_width=True)
+st.success("¡Excel cargado correctamente!")
 
-# -------------------------
+# =========================================================
+# VISTA PREVIA
+# =========================================================
+
+if seccion == "Vista previa":
+
+    st.markdown('<div class="section-card">', unsafe_allow_html=True)
+
+    st.subheader("Vista previa de datos")
+
+    st.dataframe(df.head(), use_container_width=True)
+
+    st.markdown('</div>', unsafe_allow_html=True)------------
 # 1. Diagrama Sr vs Nd (Seaborn)
 # -------------------------
 st.subheader("Diagrama Sr vs Nd")
