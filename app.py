@@ -12,24 +12,11 @@ from PIL import Image
 from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import KMeans
 
-# =========================================================
-# CONFIGURACIÓN
-# =========================================================
-
-st.set_page_config(
-    page_title="Análisis Geoquímico de Galápagos",
-    layout="wide"
-)
-
 sns.set_theme(
     style="whitegrid",
     context="talk",
     palette="deep"
 )
-
-# =========================================================
-# ESTILO VISUAL
-# =========================================================
 
 st.markdown("""
 <style>
@@ -66,7 +53,171 @@ section[data-testid="stSidebar"] * {
         url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=1600');
 
     background-size: cover;
-    st.markdown('</div>', unsafe_allow_html=True)
+    background-position: center;
+
+    padding: 2.2rem;
+
+    border-radius: 30px;
+
+    box-shadow:
+        0 12px 40px rgba(15,23,42,0.18);
+
+    margin-bottom: 2rem;
+
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-box::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(15,23,42,0.55);
+    backdrop-filter: blur(4px);
+}
+
+.hero-box * {
+    position: relative;
+    z-index: 2;
+}
+
+.main-title {
+    font-size: 3rem;
+    font-weight: 800;
+    color: white;
+}
+
+.subtitle {
+    color: #dbeafe;
+    font-size: 1.05rem;
+    line-height: 1.8;
+}
+
+.mini-tag {
+    display: inline-block;
+    background: rgba(59,130,246,0.18);
+    color: #93c5fd;
+    border: 1px solid rgba(147,197,253,0.25);
+    padding: 0.45rem 0.9rem;
+    border-radius: 999px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+.section-card {
+    background: rgba(255,255,255,0.74);
+    backdrop-filter: blur(14px);
+    border-radius: 24px;
+    padding: 1.5rem;
+    border: 1px solid rgba(255,255,255,0.5);
+    box-shadow: 0 8px 30px rgba(15,23,42,0.06);
+    margin-bottom: 1.6rem;
+}
+
+.section-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 40px rgba(15,23,42,0.10);
+}
+
+h1, h2, h3 {
+    color: #0f172a;
+    font-weight: 700;
+}
+
+div[data-testid="stDataFrame"] {
+    border-radius: 18px;
+    overflow: hidden;
+    border: 1px solid rgba(148,163,184,0.18);
+    box-shadow: 0 4px 20px rgba(15,23,42,0.05);
+}
+
+div[data-testid="stPlotlyChart"],
+div[data-testid="stPyplot"] {
+    background: rgba(255,255,255,0.86);
+    border-radius: 22px;
+    padding: 1rem;
+    border: 1px solid rgba(255,255,255,0.5);
+    box-shadow: 0 8px 30px rgba(15,23,42,0.06);
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}
+
+div[data-testid="stFileUploader"] {
+    background: rgba(255,255,255,0.82);
+    border-radius: 24px;
+    padding: 1.5rem;
+    border: 2px dashed #94a3b8;
+    box-shadow: 0 8px 24px rgba(15,23,42,0.05);
+}
+
+</style>
+""", unsafe_allow_html=True)
+st.set_page_config(page_title="Análisis Geoquímico de Galápagos", layout="wide")
+
+st.markdown("""
+<div class="hero-box">
+    <div class="mini-tag">Geoquímica · Visualización · Galápagos</div>
+    <h1 class="main-title">Análisis geoquímico de Galápagos</h1>
+    <p class="subtitle">
+        Plataforma interactiva para explorar relaciones isotópicas, clasificación TAS,
+        tierras raras, fusión parcial y dominios geoquímicos.
+    </p>
+</div>
+""", unsafe_allow_html=True)
+archivo = st.file_uploader("Sube tu archivo Excel", type=["xlsx", "xls"])
+
+if archivo is None:
+    st.info("Primero sube tu archivo Excel para ver los gráficos y resultados.")
+    st.stop()
+
+df = pd.read_excel(archivo)
+df.columns = df.columns.str.strip()
+
+if "Sr" in df.columns:
+    df["Sr"] = pd.to_numeric(
+        df["Sr"].astype(str).str.replace("*", "", regex=False),
+        errors="coerce"
+    )
+
+if "Rb" in df.columns:
+    df["Rb"] = pd.to_numeric(
+        df["Rb"].astype(str).str.replace("*", "", regex=False),
+        errors="coerce"
+    )
+
+st.success("¡Excel cargado, limpio y listo para hacer ciencia!")
+st.dataframe(df.head(), use_container_width=True)
+
+# -------------------------
+# 1. Diagrama Sr vs Nd (Seaborn)
+# -------------------------
+st.subheader("Diagrama Sr vs Nd")
+
+if {'Sr87_Sr86', 'Nd143_Nd144', 'Location'}.issubset(df.columns):
+    sns.set_theme(style="whitegrid")
+    fig, ax = plt.subplots(figsize=(10, 6))
+
+    sns.scatterplot(
+        data=df.dropna(subset=['Sr87_Sr86', 'Nd143_Nd144', 'Location']),
+        x="Sr87_Sr86",
+        y="Nd143_Nd144",
+        hue="Location",
+        palette="tab10",
+        s=100,
+        edgecolor="black",
+        ax=ax
+    )
+
+    ax.set_title("Sr vs Nd", fontsize=14, fontweight="bold")
+    ax.set_xlabel("87Sr / 86Sr", fontsize=12)
+    ax.set_ylabel("143Nd / 144Nd", fontsize=12)
+    ax.legend(bbox_to_anchor=(1.05, 1), loc="upper left")
+
+    fig.tight_layout()
+    st.pyplot(fig)
+else:
+    st.warning("Faltan columnas para el diagrama Sr vs Nd.")
 
 # -------------------------
 # 2. Sr vs Nd interactivo (Plotly)
