@@ -522,6 +522,7 @@ if {'La', 'Sm', 'Yb', 'Location', 'Sample'}.issubset(df.columns):
 else:
     st.warning("Faltan columnas necesarias para el diagrama La/Sm vs Sm/Yb.")
 
+
 # =========================================================
 # 5. Patrones REE OIB y MORB
 # =========================================================
