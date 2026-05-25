@@ -4,16 +4,15 @@ import numpy as np
 import pandas as pd
 import streamlit as st
 import matplotlib.pyplot as plt
-import matplotlib.image as mpimg
 import seaborn as sns
 import plotly.express as px
 import plotly.graph_objects as go
-from PIL import Image
+
 from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import KMeans
 
 # =========================================================
-# CONFIG
+# CONFIGURACIÓN
 # =========================================================
 
 st.set_page_config(
@@ -35,7 +34,11 @@ html{
 
 .stApp{
     background:
-    linear-gradient(180deg,#f8fafc 0%,#edf2f7 100%);
+    linear-gradient(
+        180deg,
+        #f8fafc 0%,
+        #edf2f7 100%
+    );
 }
 
 .block-container{
@@ -48,7 +51,11 @@ html{
 
 section[data-testid="stSidebar"]{
     background:
-    linear-gradient(180deg,#081224 0%,#10284a 100%);
+    linear-gradient(
+        180deg,
+        #081224 0%,
+        #10284a 100%
+    );
 }
 
 h1,h2,h3{
@@ -125,15 +132,6 @@ h1,h2,h3{
     margin-bottom:0;
 }
 
-.metric-card{
-    background:white;
-    border-radius:20px;
-    padding:1.2rem;
-    border:1px solid #e2e8f0;
-    box-shadow:
-    0 6px 18px rgba(0,0,0,0.05);
-}
-
 div[data-testid="metric-container"]{
     background:white;
     border:1px solid #e2e8f0;
@@ -197,20 +195,6 @@ div[data-testid="stFileUploader"]{
 
 .sidebar-card a:hover{
     color:#93c5fd !important;
-}
-
-hr{
-    margin-top:2rem;
-    margin-bottom:2rem;
-    border:none;
-    height:1px;
-    background:
-    linear-gradient(
-        to right,
-        transparent,
-        #cbd5e1,
-        transparent
-    );
 }
 
 </style>
