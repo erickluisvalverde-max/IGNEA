@@ -336,13 +336,29 @@ if {'Sr87_Sr86', 'Nd143_Nd144', 'Location'}.issubset(df.columns):
     else:
         st.warning("No se encontró la imagen SRvsND.png.png.")
 
-# -------------------------
-# 4. La/Sm vs Sm/Yb (Plotly)
-# -------------------------
+# =========================================================
+# 4. La/Sm vs Sm/Yb
+# =========================================================
+
+st.markdown('<div id="ree"></div>', unsafe_allow_html=True)
+
+st.markdown("""
+<div class="section-card">
+    <h2>La/Sm vs Sm/Yb</h2>
+    <p>
+        Variaciones geoquímicas de elementos de tierras raras
+        para interpretar enriquecimiento mantélico y profundidad de fusión.
+    </p>
+""", unsafe_allow_html=True)
+
 if {'La', 'Sm', 'Yb', 'Location', 'Sample'}.issubset(df.columns):
-    df_ree = df.dropna(subset=['La', 'Sm', 'Yb']).copy()
+
+    df_ree = df.dropna(
+        subset=['La', 'Sm', 'Yb']
+    ).copy()
 
     if not df_ree.empty:
+
         df_ree['La_Sm'] = df_ree['La'] / df_ree['Sm']
         df_ree['Sm_Yb'] = df_ree['Sm'] / df_ree['Yb']
 
@@ -352,7 +368,7 @@ if {'La', 'Sm', 'Yb', 'Location', 'Sample'}.issubset(df.columns):
             y='La_Sm',
             color='Location',
             hover_name='Sample',
-            title='La/Sm vs Sm/Yb',
+            title='',
             labels={
                 'Sm_Yb': 'Sm / Yb',
                 'La_Sm': 'La / Sm',
@@ -363,17 +379,81 @@ if {'La', 'Sm', 'Yb', 'Location', 'Sample'}.issubset(df.columns):
 
         fig.update_traces(
             marker=dict(
-                size=12,
-                line=dict(width=1, color='black')
+                size=13,
+                line=dict(
+                    width=1,
+                    color='black'
+                ),
+                opacity=0.92
             ),
             selector=dict(mode='markers')
         )
 
-        st.plotly_chart(fig, use_container_width=True)
+        fig.update_layout(
+            height=620,
 
-# -------------------------
-# 5. OIB y MORB
-# -------------------------
+            paper_bgcolor='rgba(0,0,0,0)',
+            plot_bgcolor='white',
+
+            font=dict(
+                family='Segoe UI',
+                size=13,
+                color='#0f172a'
+            ),
+
+            legend=dict(
+                title='Localidad',
+                bgcolor='rgba(255,255,255,0.85)',
+                bordercolor='#cbd5e1',
+                borderwidth=1
+            ),
+
+            margin=dict(
+                l=40,
+                r=40,
+                t=30,
+                b=40
+            )
+        )
+
+        fig.update_xaxes(
+            showgrid=True,
+            gridcolor='rgba(148,163,184,0.25)',
+            zeroline=False
+        )
+
+        fig.update_yaxes(
+            showgrid=True,
+            gridcolor='rgba(148,163,184,0.25)',
+            zeroline=False
+        )
+
+        st.plotly_chart(
+            fig,
+            use_container_width=True
+        )
+
+else:
+    st.warning("Faltan columnas necesarias para el diagrama La/Sm vs Sm/Yb.")
+
+st.markdown("</div>", unsafe_allow_html=True)
+
+
+# =========================================================
+# 5. Patrones REE · OIB y MORB
+# =========================================================
+
+st.markdown('<div id="ree-patterns"></div>', unsafe_allow_html=True)
+
+st.markdown("""
+<div class="section-card">
+    <h2>Patrones REE · OIB y MORB</h2>
+    <p>
+        Comparación de patrones de tierras raras normalizados a condrito
+        para identificar afinidades tipo OIB y MORB.
+    </p>
+""", unsafe_allow_html=True)
+
 nombre_columna_localidad = 'Location'
 nombre_columna_muestra = 'Sample'
 
@@ -398,21 +478,41 @@ morb_ref = {
 elementos_ree = list(condrito.keys())
 
 if nombre_columna_localidad in df.columns and nombre_columna_muestra in df.columns:
+
     df_spider = df.copy()
 
     for col in elementos_ree:
-        if col in df_spider.columns:
-            df_spider[col] = pd.to_numeric(df_spider[col], errors='coerce')
-            df_spider[col] = df_spider[col].replace(0, np.nan)
 
-    ree_disponibles = [e for e in elementos_ree if e in df_spider.columns]
+        if col in df_spider.columns:
+
+            df_spider[col] = pd.to_numeric(
+                df_spider[col],
+                errors='coerce'
+            )
+
+            df_spider[col] = df_spider[col].replace(
+                0,
+                np.nan
+            )
+
+    ree_disponibles = [
+        e for e in elementos_ree
+        if e in df_spider.columns
+    ]
 
     for elemento in ree_disponibles:
-        df_spider[elemento] = df_spider[elemento] / condrito[elemento]
+
+        df_spider[elemento] = (
+            df_spider[elemento] / condrito[elemento]
+        )
 
     if ree_disponibles:
+
         df_melted = df_spider.melt(
-            id_vars=[nombre_columna_muestra, nombre_columna_localidad],
+            id_vars=[
+                nombre_columna_muestra,
+                nombre_columna_localidad
+            ],
             value_vars=ree_disponibles,
             var_name='Elemento',
             value_name='Concentracion_Normalizada'
@@ -425,48 +525,117 @@ if nombre_columna_localidad in df.columns and nombre_columna_muestra in df.colum
             color=nombre_columna_localidad,
             line_group=nombre_columna_muestra,
             hover_name=nombre_columna_muestra,
-            title='OIB y MORB',
+            title='',
             log_y=True,
-            markers=True
+            markers=True,
+            template='plotly_white'
         )
 
         fig.update_traces(
-            line=dict(width=1),
-            opacity=0.4,
-            marker=dict(size=4)
+            line=dict(width=1.3),
+            opacity=0.45,
+            marker=dict(size=5)
         )
 
-        oib_norm = [oib_ref[e] / condrito[e] for e in ree_disponibles]
-        morb_norm = [morb_ref[e] / condrito[e] for e in ree_disponibles]
+        oib_norm = [
+            oib_ref[e] / condrito[e]
+            for e in ree_disponibles
+        ]
 
-        fig.add_trace(go.Scatter(
-            x=ree_disponibles,
-            y=oib_norm,
-            mode='lines+markers',
-            name='OIB (Referencia)',
-            line=dict(color='red', width=4, dash='dash'),
-            marker=dict(size=8, color='red', symbol='diamond')
-        ))
+        morb_norm = [
+            morb_ref[e] / condrito[e]
+            for e in ree_disponibles
+        ]
 
-        fig.add_trace(go.Scatter(
-            x=ree_disponibles,
-            y=morb_norm,
-            mode='lines+markers',
-            name='N-MORB (Referencia)',
-            line=dict(color='blue', width=4, dash='dash'),
-            marker=dict(size=8, color='blue', symbol='square')
-        ))
+        fig.add_trace(
+            go.Scatter(
+                x=ree_disponibles,
+                y=oib_norm,
+                mode='lines+markers',
+                name='OIB (Referencia)',
+                line=dict(
+                    color='red',
+                    width=4,
+                    dash='dash'
+                ),
+                marker=dict(
+                    size=9,
+                    color='red',
+                    symbol='diamond'
+                )
+            )
+        )
+
+        fig.add_trace(
+            go.Scatter(
+                x=ree_disponibles,
+                y=morb_norm,
+                mode='lines+markers',
+                name='N-MORB (Referencia)',
+                line=dict(
+                    color='blue',
+                    width=4,
+                    dash='dash'
+                ),
+                marker=dict(
+                    size=9,
+                    color='blue',
+                    symbol='square'
+                )
+            )
+        )
 
         fig.update_layout(
-            xaxis_title='Elementos de Tierras Raras (LREE -> HREE)',
-            yaxis_title='Muestra / Condrito',
-            template='plotly_white',
+
+            height=680,
+
+            paper_bgcolor='rgba(0,0,0,0)',
+            plot_bgcolor='white',
+
             hovermode='closest',
-            width=950,
-            height=600
+
+            font=dict(
+                family='Segoe UI',
+                size=13,
+                color='#0f172a'
+            ),
+
+            legend=dict(
+                bgcolor='rgba(255,255,255,0.85)',
+                bordercolor='#cbd5e1',
+                borderwidth=1
+            ),
+
+            margin=dict(
+                l=40,
+                r=40,
+                t=30,
+                b=40
+            ),
+
+            xaxis_title='Elementos de Tierras Raras (LREE → HREE)',
+
+            yaxis_title='Muestra / Condrito'
         )
 
-        st.plotly_chart(fig, use_container_width=True)
+        fig.update_xaxes(
+            showgrid=False
+        )
+
+        fig.update_yaxes(
+            showgrid=True,
+            gridcolor='rgba(148,163,184,0.25)'
+        )
+
+        st.plotly_chart(
+            fig,
+            use_container_width=True
+        )
+
+else:
+    st.warning("Faltan columnas necesarias para generar patrones REE.")
+
+st.markdown("</div>", unsafe_allow_html=True)
 
 # -------------------------
 # 6. TAS con % de Fusión
