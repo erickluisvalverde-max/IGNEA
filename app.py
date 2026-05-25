@@ -515,13 +515,23 @@ if {'La', 'Sm', 'Yb', 'Location', 'Sample'}.issubset(df.columns):
             margin=dict(l=40, r=40, t=30, b=40)
         )
 
-        fig.update_xaxes(showgrid=True, gridcolor='rgba(148,163,184,0.25)', zeroline=False)
-        fig.update_yaxes(showgrid=True, gridcolor='rgba(148,163,184,0.25)', zeroline=False)
+        fig.update_xaxes(
+            showgrid=True,
+            gridcolor='rgba(148,163,184,0.25)',
+            zeroline=False
+        )
+
+        fig.update_yaxes(
+            showgrid=True,
+            gridcolor='rgba(148,163,184,0.25)',
+            zeroline=False
+        )
 
         st.plotly_chart(fig, use_container_width=True)
+    else:
+        st.warning("No hay datos válidos para graficar La/Sm vs Sm/Yb.")
 else:
     st.warning("Faltan columnas necesarias para el diagrama La/Sm vs Sm/Yb.")
-
 
 # =========================================================
 # 5. Patrones REE OIB y MORB
