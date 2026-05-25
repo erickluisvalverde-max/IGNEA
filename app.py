@@ -11,25 +11,66 @@ import plotly.graph_objects as go
 from PIL import Image
 from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import KMeans
-
 st.set_page_config(
     page_title="Análisis Geoquímico de Galápagos",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-st.sidebar.markdown("""
-### Herramientas
+# =========================================================
+# SIDEBAR
+# =========================================================
 
-- [Vista general](#top)
-- [Sr vs Nd](#srnd)
-- [REE](#ree)
-- [TAS](#tas)
-- [Clustering](#clustering)
+st.sidebar.markdown("""
+<h1 style="
+    color:#0f172a;
+    font-size:2rem;
+    font-weight:800;
+    margin-bottom:2rem;
+">
+    Panel Geoquímico
+</h1>
 """, unsafe_allow_html=True)
+
+st.sidebar.markdown("""
+<div style="
+    background:white;
+    padding:1rem;
+    border-radius:16px;
+    border:1px solid #e2e8f0;
+    box-shadow:0 4px 14px rgba(0,0,0,0.05);
+">
+
+<p style="
+    color:#64748b;
+    font-size:0.95rem;
+    margin-bottom:0.8rem;
+    font-weight:600;
+">
+    Herramientas
+</p>
+
+<ul style="
+    padding-left:1.2rem;
+    line-height:2;
+    font-size:1rem;
+">
+    <li><a href="#srnd">Sr vs Nd</a></li>
+    <li><a href="#ree">REE</a></li>
+    <li><a href="#tas">TAS</a></li>
+    <li><a href="#clustering">Clustering</a></li>
+</ul>
+
+</div>
+""", unsafe_allow_html=True)
+
+# =========================================================
+# ESTILOS
+# =========================================================
 
 st.markdown("""
 <style>
+
     .stApp {
         background: linear-gradient(180deg, #f4f7fb 0%, #eaf0f8 100%);
     }
@@ -48,50 +89,46 @@ st.markdown("""
     }
 
     .main-title {
-        font-size: 2.2rem;
+        font-size: 2.8rem;
         font-weight: 800;
-        color: #0b1f3a;
-        margin-bottom: 0.2rem;
+        color: white;
+        margin-bottom: 0.5rem;
     }
 
     .subtitle {
         font-size: 1.05rem;
-        color: #475569;
-        margin-bottom: 1.5rem;
+        color: #dbeafe;
+        margin-bottom: 0;
+        line-height: 1.7;
     }
 
     .hero-box {
-        background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%);
-        padding: 1.4rem 1.6rem;
-        border-radius: 18px;
-        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.18);
-        margin-bottom: 1.5rem;
-    }
+        background: linear-gradient(
+            135deg,
+            #081224 0%,
+            #10284a 50%,
+            #1d4e89 100%
+        );
 
-    .hero-box h1 {
-        color: white !important;
-        margin-bottom: 0.3rem;
-    }
-
-    .hero-box p {
-        color: #dbeafe;
-        margin: 0;
-        font-size: 1rem;
+        padding: 2rem;
+        border-radius: 24px;
+        box-shadow: 0 12px 35px rgba(15, 23, 42, 0.22);
+        margin-bottom: 2rem;
     }
 
     .section-card {
         background: white;
-        border-radius: 18px;
-        padding: 1.2rem 1.2rem 0.8rem 1.2rem;
+        border-radius: 20px;
+        padding: 1.4rem;
         box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
         border: 1px solid #e2e8f0;
-        margin-bottom: 1.2rem;
+        margin-bottom: 1.5rem;
     }
 
     div[data-testid="stDataFrame"] {
         background: white;
-        border-radius: 14px;
-        padding: 0.4rem;
+        border-radius: 16px;
+        padding: 0.5rem;
         border: 1px solid #dbe2ea;
         box-shadow: 0 4px 14px rgba(0,0,0,0.04);
     }
@@ -99,16 +136,16 @@ st.markdown("""
     div[data-testid="stPlotlyChart"],
     div[data-testid="stPyplot"] {
         background: white;
-        border-radius: 16px;
-        padding: 0.8rem;
+        border-radius: 18px;
+        padding: 1rem;
         border: 1px solid #e2e8f0;
         box-shadow: 0 6px 18px rgba(0,0,0,0.05);
-        margin-bottom: 1rem;
+        margin-bottom: 1.5rem;
     }
 
     div[data-testid="stFileUploader"] {
         background: white;
-        border-radius: 16px;
+        border-radius: 18px;
         padding: 1rem;
         border: 1px dashed #94a3b8;
         box-shadow: 0 6px 18px rgba(0,0,0,0.04);
@@ -116,59 +153,162 @@ st.markdown("""
 
     .mini-tag {
         display: inline-block;
-        background: #dbeafe;
-        color: #1d4ed8;
-        padding: 0.35rem 0.7rem;
+        background: rgba(255,255,255,0.12);
+        color: #dbeafe;
+        padding: 0.45rem 0.9rem;
         border-radius: 999px;
         font-size: 0.85rem;
         font-weight: 600;
-        margin-bottom: 0.8rem;
+        margin-bottom: 1rem;
+        border: 1px solid rgba(255,255,255,0.15);
     }
 
     hr {
-        margin-top: 1.8rem;
-        margin-bottom: 1.2rem;
+        margin-top: 2rem;
+        margin-bottom: 1.5rem;
         border: none;
         height: 1px;
-        background: linear-gradient(to right, transparent, #94a3b8, transparent);
+        background: linear-gradient(
+            to right,
+            transparent,
+            #94a3b8,
+            transparent
+        );
     }
+
 </style>
 """, unsafe_allow_html=True)
 
+# =========================================================
+# HERO
+# =========================================================
 
 st.markdown("""
 <div class="hero-box">
-    <div class="mini-tag">Geoquímica · Visualización · Galápagos</div>
-    <h1 class="main-title">Análisis geoquímico de Galápagos</h1>
+
+    <div class="mini-tag">
+        Geoquímica · Visualización · Galápagos
+    </div>
+
+    <h1 class="main-title">
+        Análisis geoquímico de Galápagos
+    </h1>
+
     <p class="subtitle">
-        Plataforma interactiva para explorar relaciones isotópicas, clasificación TAS,
-        tierras raras, fusión parcial y dominios geoquímicos.
+        Plataforma interactiva para explorar relaciones isotópicas,
+        clasificación TAS, tierras raras, fusión parcial y dominios geoquímicos.
     </p>
+
 </div>
 """, unsafe_allow_html=True)
-archivo = st.file_uploader("Sube tu archivo Excel", type=["xlsx", "xls"])
+
+# =========================================================
+# FILE UPLOADER
+# =========================================================
+
+archivo = st.file_uploader(
+    "Sube tu archivo Excel",
+    type=["xlsx", "xls"]
+)
 
 if archivo is None:
-    st.info("Primero sube tu archivo Excel para ver los gráficos y resultados.")
+
+    st.info(
+        "Primero sube tu archivo Excel para visualizar los análisis geoquímicos."
+    )
+
     st.stop()
 
+# =========================================================
+# CARGA DE DATOS
+# =========================================================
+
 df = pd.read_excel(archivo)
+
 df.columns = df.columns.str.strip()
 
 if "Sr" in df.columns:
+
     df["Sr"] = pd.to_numeric(
-        df["Sr"].astype(str).str.replace("*", "", regex=False),
+        df["Sr"]
+        .astype(str)
+        .str.replace("*", "", regex=False),
         errors="coerce"
     )
 
 if "Rb" in df.columns:
+
     df["Rb"] = pd.to_numeric(
-        df["Rb"].astype(str).str.replace("*", "", regex=False),
+        df["Rb"]
+        .astype(str)
+        .str.replace("*", "", regex=False),
         errors="coerce"
     )
 
-st.success("¡Excel cargado, limpio y listo para hacer ciencia!")
-st.dataframe(df.head(), use_container_width=True)
+# =========================================================
+# MENSAJE
+# =========================================================
+
+st.success("¡Excel cargado correctamente!")
+
+# =========================================================
+# PANEL GENERAL
+# =========================================================
+
+st.markdown("""
+<div class="section-card">
+
+<h2 style="
+    margin-top:0;
+    color:#0f172a;
+    font-size:1.8rem;
+    font-weight:800;
+    margin-bottom:0.5rem;
+">
+    Vista General del Dataset
+</h2>
+
+<p style="
+    color:#64748b;
+    font-size:1rem;
+    line-height:1.7;
+    margin-bottom:1.5rem;
+">
+    Visualización inicial del archivo geoquímico cargado.
+    Aquí puedes inspeccionar muestras, variables químicas
+    y relaciones isotópicas antes de realizar el análisis.
+</p>
+
+</div>
+""", unsafe_allow_html=True)
+
+col1, col2, col3 = st.columns(3)
+
+with col1:
+    st.metric(
+        label="Número de muestras",
+        value=len(df)
+    )
+
+with col2:
+    st.metric(
+        label="Variables geoquímicas",
+        value=len(df.columns)
+    )
+
+with col3:
+    st.metric(
+        label="Valores faltantes",
+        value=int(df.isna().sum().sum())
+    )
+
+st.markdown("### Dataset Geoquímico")
+
+st.dataframe(
+    df,
+    use_container_width=True,
+    height=500
+)
 
 # =========================================================
 # 1. Diagrama Sr vs Nd
