@@ -957,29 +957,14 @@ st.markdown('<div id="clustering"></div>', unsafe_allow_html=True)
 
 st.markdown("""
 <div class="section-card">
+<h2>Clustering Geoquímico K-Means</h2>
 
-    <h2 style="
-        margin-top:0;
-        margin-bottom:0.5rem;
-        color:#0f172a;
-        font-size:1.6rem;
-        font-weight:800;
-    ">
-        Clustering Geoquímico K-Means
-    </h2>
-
-    <p style="
-        color:#64748b;
-        font-size:0.95rem;
-        margin-bottom:0;
-        line-height:1.7;
-    ">
-        Agrupamiento geoquímico automático basado en
-        relaciones isotópicas y elementos REE para
-        interpretar dominios mantélicos y tendencias
-        geoquímicas entre muestras volcánicas.
-    </p>
-
+<p>
+Agrupamiento geoquímico automático basado en
+relaciones isotópicas y elementos REE para
+interpretar dominios mantélicos y tendencias
+geoquímicas entre muestras volcánicas.
+</p>
 </div>
 """, unsafe_allow_html=True)
 
@@ -993,9 +978,7 @@ columnas_ml = [
 
 if set(columnas_ml).issubset(df.columns):
 
-    df_ml = df.dropna(
-        subset=columnas_ml
-    ).copy()
+    df_ml = df.dropna(subset=columnas_ml).copy()
 
     if len(df_ml) >= 3:
 
@@ -1011,13 +994,11 @@ if set(columnas_ml).issubset(df.columns):
             n_init=10
         )
 
-        df_ml['Cluster_IA'] = kmeans.fit_predict(
-            X_escalado
-        )
+        df_ml['Cluster_IA'] = kmeans.fit_predict(X_escalado)
 
         df_ml['Cluster_IA'] = (
-            'Grupo Químico '
-            + df_ml['Cluster_IA'].astype(str)
+            'Grupo Químico ' +
+            df_ml['Cluster_IA'].astype(str)
         )
 
         nombres_geologicos = {
@@ -1059,38 +1040,13 @@ if set(columnas_ml).issubset(df.columns):
                     width=1,
                     color='black'
                 )
-            ),
-            selector=dict(mode='markers')
-        )
-
-        fig.update_layout(
-            width=950,
-            height=600,
-            title_x=0.02,
-            title_font_size=22,
-            legend_title='Interpretación'
+            )
         )
 
         st.plotly_chart(
             fig,
             use_container_width=True
         )
-
-        st.markdown("""
-        <div class="section-card">
-
-            <h3 style="
-                margin-top:0;
-                margin-bottom:0;
-                color:#0f172a;
-                font-size:1.2rem;
-                font-weight:700;
-            ">
-                Resumen de agrupamientos geoquímicos
-            </h3>
-
-        </div>
-        """, unsafe_allow_html=True)
 
         resumen_clusters = (
             df_ml[
@@ -1125,5 +1081,3 @@ else:
     st.warning(
         "Faltan columnas necesarias para ejecutar el clustering geoquímico."
     )
-
-# -------------------------
