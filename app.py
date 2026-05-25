@@ -155,6 +155,10 @@ div[data-testid="stFileUploader"] {
 """, unsafe_allow_html=True)
 st.set_page_config(page_title="Análisis Geoquímico de Galápagos", layout="wide")
 
+# =========================================================
+# HERO PRINCIPAL
+# =========================================================
+
 st.markdown("""
 <div class="hero-box">
 
@@ -168,12 +172,30 @@ st.markdown("""
 
     <p class="subtitle">
         Plataforma interactiva para explorar relaciones isotópicas,
-        patrones de tierras raras, clasificación TAS,
-        procesos de fusión parcial y dominios geoquímicos.
+        patrones REE, clasificación TAS,
+        fusión parcial y dominios geoquímicos.
     </p>
 
 </div>
 """, unsafe_allow_html=True)
+
+# =========================================================
+# MENÚ LATERAL
+# =========================================================
+
+st.sidebar.title("Panel Geoquímico")
+
+st.sidebar.markdown("---")
+
+st.sidebar.markdown("""
+### Navegación
+
+- Sr vs Nd
+- Patrones REE
+- TAS
+- Fusión Parcial
+- Clustering
+""")
 st.sidebar.title("Panel Geoquímico")
 
 st.sidebar.markdown("---")
