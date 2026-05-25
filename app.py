@@ -454,154 +454,74 @@ if {'Sr87_Sr86', 'Nd143_Nd144', 'Location'}.issubset(df.columns):
     else:
         st.warning("No se encontró la imagen SRvsND.png.png.")
 
-# =========================================================
-# 5. Patrones REE OIB y MORB
-# =========================================================
+# después de crear fig = px.line(...)
 
-st.markdown("""
-<div class="section-card">
-    <h2 class="section-title">Patrones REE OIB y MORB</h2>
-    <p class="section-text">
-        Comparacion de patrones de tierras raras normalizados a condrito
-        para identificar afinidades tipo OIB y MORB.
-    </p>
-</div>
-""", unsafe_allow_html=True)
+# muestras: un poco más visibles pero sin tapar todo
+fig.update_traces(
+    line=dict(width=1),
+    opacity=0.6,
+    marker=dict(size=4)
+)
 
-nombre_columna_localidad = 'Location'
-nombre_columna_muestra = 'Sample'
+# recalcula referencias como ya tienes
+oib_norm = [oib_ref[e] / condrito[e] for e in ree_disponibles]
+morb_norm = [morb_ref[e] / condrito[e] for e in ree_disponibles]
 
-condrito = {
-    'La': 0.237, 'Ce': 0.613, 'Pr': 0.0928, 'Nd': 0.457, 'Sm': 0.148,
-    'Eu': 0.0563, 'Gd': 0.199, 'Tb': 0.0361, 'Dy': 0.246, 'Ho': 0.0546,
-    'Er': 0.160, 'Tm': 0.0247, 'Yb': 0.161, 'Lu': 0.0246
-}
+# referencias destacadas
+fig.add_trace(go.Scatter(
+    x=ree_disponibles,
+    y=oib_norm,
+    mode='lines+markers',
+    name='OIB (Referencia)',
+    line=dict(color='red', width=5, dash='dash'),
+    marker=dict(size=9, color='red', symbol='diamond')
+))
 
-oib_ref = {
-    'La': 37, 'Ce': 80, 'Pr': 9.7, 'Nd': 38.5, 'Sm': 10,
-    'Eu': 3, 'Gd': 7.62, 'Tb': 1.05, 'Dy': 5.6, 'Ho': 1.06,
-    'Er': 2.62, 'Tm': 0.35, 'Yb': 2.16, 'Lu': 0.3
-}
+fig.add_trace(go.Scatter(
+    x=ree_disponibles,
+    y=morb_norm,
+    mode='lines+markers',
+    name='N-MORB (Referencia)',
+    line=dict(color='blue', width=5, dash='dash'),
+    marker=dict(size=9, color='blue', symbol='square')
+))
 
-morb_ref = {
-    'La': 2.5, 'Ce': 7.5, 'Pr': 1.32, 'Nd': 7.3, 'Sm': 2.63,
-    'Eu': 1.02, 'Gd': 3.68, 'Tb': 0.67, 'Dy': 4.55, 'Ho': 1.01,
-    'Er': 2.97, 'Tm': 0.456, 'Yb': 3.05, 'Lu': 0.455
-}
+fig.update_layout(
+    height=600,
+    paper_bgcolor='white',
+    plot_bgcolor='white',
+    hovermode='closest',
+    font=dict(
+        family='Segoe UI',
+        size=15,
+        color='black'
+    ),
+    title_font=dict(size=20, color='black'),
+    legend=dict(
+        title='Location',
+        bgcolor='white',
+        bordercolor='lightgray',
+        borderwidth=1,
+        font=dict(color='black', size=13),
+        title_font=dict(color='black', size=14)
+    ),
+    xaxis_title='Elementos de Tierras Raras (LREE -> HREE)',
+    yaxis_title='Muestra / Condrito'
+)
 
-elementos_ree = list(condrito.keys())
+fig.update_xaxes(
+    showgrid=False,
+    zeroline=False,
+    tickfont=dict(size=13, color='black'),
+    title_font=dict(size=15, color='black')
+)
 
-if nombre_columna_localidad in df.columns and nombre_columna_muestra in df.columns:
-    df_spider = df.copy()
-
-    for col in elementos_ree:
-        if col in df_spider.columns:
-            df_spider[col] = pd.to_numeric(df_spider[col], errors='coerce')
-            df_spider[col] = df_spider[col].replace(0, np.nan)
-
-    for elemento in elementos_ree:
-        if elemento in df_spider.columns:
-            df_spider[elemento] = df_spider[elemento] / condrito[elemento]
-
-    ree_disponibles = [e for e in elementos_ree if e in df_spider.columns]
-
-    if ree_disponibles:
-        df_melted = df_spider.melt(
-            id_vars=[nombre_columna_muestra, nombre_columna_localidad],
-            value_vars=ree_disponibles,
-            var_name='Elemento',
-            value_name='Concentracion_Normalizada'
-        ).dropna(subset=['Concentracion_Normalizada'])
-
-        fig = px.line(
-            df_melted,
-            x='Elemento',
-            y='Concentracion_Normalizada',
-            color=nombre_columna_localidad,
-            line_group=nombre_columna_muestra,
-            hover_name=nombre_columna_muestra,
-            title='OIB y MORB',
-            log_y=True,
-            markers=True,
-            template='plotly_white'
-        )
-
-        fig.update_traces(
-            line=dict(width=1),
-            opacity=0.4,
-            marker=dict(size=4)
-        )
-
-        oib_norm = [oib_ref[e] / condrito[e] for e in ree_disponibles]
-        morb_norm = [morb_ref[e] / condrito[e] for e in ree_disponibles]
-
-        fig.add_trace(go.Scatter(
-            x=ree_disponibles,
-            y=oib_norm,
-            mode='lines+markers',
-            name='OIB (Referencia)',
-            line=dict(color='red', width=4, dash='dash'),
-            marker=dict(size=8, color='red', symbol='diamond')
-        ))
-
-        fig.add_trace(go.Scatter(
-            x=ree_disponibles,
-            y=morb_norm,
-            mode='lines+markers',
-            name='N-MORB (Referencia)',
-            line=dict(color='blue', width=4, dash='dash'),
-            marker=dict(size=8, color='blue', symbol='square')
-        ))
-
-        fig.update_layout(
-            height=600,
-            paper_bgcolor='white',
-            plot_bgcolor='white',
-            hovermode='closest',
-            font=dict(
-                family='Segoe UI',
-                size=14,
-                color='black'
-            ),
-            title_font=dict(size=20, color='black'),
-            legend=dict(
-                title='Location',
-                bgcolor='white',
-                bordercolor='lightgray',
-                borderwidth=1,
-                font=dict(color='black', size=12),
-                title_font=dict(color='black', size=13)
-            ),
-            xaxis_title='Elementos de Tierras Raras (LREE -> HREE)',
-            yaxis_title='Muestra / Condrito'
-        )
-
-        fig.update_xaxes(
-            showgrid=False,
-            zeroline=False,
-            showline=False,
-            ticks='outside',
-            tickfont=dict(size=12, color='black'),
-            title_font=dict(size=14, color='black'),
-            showspikes=False
-        )
-
-        fig.update_yaxes(
-            showgrid=False,
-            zeroline=False,
-            showline=False,
-            ticks='outside',
-            tickfont=dict(size=12, color='black'),
-            title_font=dict(size=14, color='black'),
-            showspikes=False
-        )
-
-        st.plotly_chart(fig, use_container_width=True)
-    else:
-        st.warning("No hay elementos REE disponibles en el archivo.")
-else:
-    st.warning("Faltan columnas necesarias para generar patrones REE.")
-
+fig.update_yaxes(
+    showgrid=False,
+    zeroline=False,
+    tickfont=dict(size=13, color='black'),
+    title_font=dict(size=15, color='black')
+)
 # =========================================================
 # 5. Patrones REE OIB y MORB
 # =========================================================
