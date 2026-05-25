@@ -23,59 +23,15 @@ st.set_page_config(
 )
 
 # =========================================================
-# SIDEBAR
-# =========================================================
-
-st.sidebar.markdown("""
-<style>
-.sidebar-title{
-    font-size:1.7rem;
-    font-weight:800;
-    color:white;
-    margin-bottom:1rem;
-}
-
-.sidebar-card{
-    background:rgba(255,255,255,0.08);
-    padding:1rem;
-    border-radius:16px;
-    border:1px solid rgba(255,255,255,0.08);
-}
-
-.sidebar-card a{
-    text-decoration:none;
-    color:white !important;
-    font-size:1rem;
-    line-height:2.2;
-    font-weight:500;
-}
-
-.sidebar-card a:hover{
-    color:#93c5fd !important;
-}
-</style>
-
-<div class="sidebar-title">
-    Panel Geoquímico
-</div>
-
-<div class="sidebar-card">
-
-<a href="#top">Vista General</a><br>
-<a href="#srnd">Sr vs Nd</a><br>
-<a href="#ree">REE</a><br>
-<a href="#tas">TAS</a><br>
-<a href="#clustering">Clustering</a>
-
-</div>
-""", unsafe_allow_html=True)
-
-# =========================================================
 # ESTILOS
 # =========================================================
 
 st.markdown("""
 <style>
+
+html{
+    scroll-behavior:smooth;
+}
 
 .stApp{
     background:
@@ -118,14 +74,14 @@ h1,h2,h3{
 }
 
 .main-title{
-    color:white;
+    color:white !important;
     font-size:3rem;
     font-weight:800;
     margin-bottom:0.6rem;
 }
 
 .subtitle{
-    color:#dbeafe;
+    color:#dbeafe !important;
     font-size:1.08rem;
     line-height:1.8;
     margin-bottom:0;
@@ -135,7 +91,7 @@ h1,h2,h3{
     display:inline-block;
     background:rgba(255,255,255,0.12);
     border:1px solid rgba(255,255,255,0.12);
-    color:#dbeafe;
+    color:#dbeafe !important;
     padding:0.45rem 0.9rem;
     border-radius:999px;
     font-size:0.82rem;
@@ -152,6 +108,39 @@ h1,h2,h3{
     0 6px 22px rgba(0,0,0,0.05);
 
     margin-bottom:1.5rem;
+}
+
+.section-title{
+    margin-top:0;
+    margin-bottom:0.5rem;
+    font-size:1.8rem;
+    font-weight:800;
+    color:#0f172a !important;
+}
+
+.section-text{
+    color:#64748b !important;
+    font-size:1rem;
+    line-height:1.7;
+    margin-bottom:0;
+}
+
+.metric-card{
+    background:white;
+    border-radius:20px;
+    padding:1.2rem;
+    border:1px solid #e2e8f0;
+    box-shadow:
+    0 6px 18px rgba(0,0,0,0.05);
+}
+
+div[data-testid="metric-container"]{
+    background:white;
+    border:1px solid #e2e8f0;
+    padding:1rem;
+    border-radius:18px;
+    box-shadow:
+    0 4px 14px rgba(0,0,0,0.04);
 }
 
 div[data-testid="stDataFrame"]{
@@ -184,6 +173,32 @@ div[data-testid="stFileUploader"]{
     0 6px 18px rgba(0,0,0,0.04);
 }
 
+.sidebar-title{
+    font-size:1.7rem;
+    font-weight:800;
+    color:white;
+    margin-bottom:1rem;
+}
+
+.sidebar-card{
+    background:rgba(255,255,255,0.08);
+    padding:1rem;
+    border-radius:16px;
+    border:1px solid rgba(255,255,255,0.08);
+}
+
+.sidebar-card a{
+    text-decoration:none;
+    color:white !important;
+    font-size:1rem;
+    line-height:2.2;
+    font-weight:500;
+}
+
+.sidebar-card a:hover{
+    color:#93c5fd !important;
+}
+
 hr{
     margin-top:2rem;
     margin-bottom:2rem;
@@ -199,6 +214,26 @@ hr{
 }
 
 </style>
+""", unsafe_allow_html=True)
+
+# =========================================================
+# SIDEBAR
+# =========================================================
+
+st.sidebar.markdown("""
+<div class="sidebar-title">
+    Panel Geoquímico
+</div>
+
+<div class="sidebar-card">
+
+<a href="#top">Vista General</a><br>
+<a href="#srnd">Sr vs Nd</a><br>
+<a href="#ree">REE</a><br>
+<a href="#tas">TAS</a><br>
+<a href="#clustering">Clustering</a>
+
+</div>
 """, unsafe_allow_html=True)
 
 # =========================================================
@@ -283,25 +318,15 @@ st.success("¡Excel cargado correctamente!")
 st.markdown("""
 <div class="section-card">
 
-<h2 style="
-    margin-top:0;
-    margin-bottom:0.5rem;
-    font-size:1.8rem;
-    font-weight:800;
-">
-    Vista General del Dataset
-</h2>
+    <h2 class="section-title">
+        Vista General del Dataset
+    </h2>
 
-<p style="
-    color:#64748b;
-    font-size:1rem;
-    line-height:1.7;
-    margin-bottom:0;
-">
-    Visualización inicial del archivo geoquímico cargado.
-    Aquí puedes inspeccionar muestras, variables químicas
-    y relaciones isotópicas antes del análisis.
-</p>
+    <p class="section-text">
+        Visualización inicial del archivo geoquímico cargado.
+        Aquí puedes inspeccionar muestras, variables químicas
+        y relaciones isotópicas antes del análisis.
+    </p>
 
 </div>
 """, unsafe_allow_html=True)
@@ -329,14 +354,13 @@ with col3:
         value=int(df.isna().sum().sum())
     )
 
-st.markdown("### Dataset Geoquímico")
+st.markdown("## Dataset Geoquímico")
 
 st.dataframe(
     df,
     use_container_width=True,
     height=500
 )
-
 # =========================================================
 # 1. Diagrama Sr vs Nd
 # =========================================================
