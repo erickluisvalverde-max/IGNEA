@@ -18,18 +18,16 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-st.sidebar.title("Panel Geoquímico")
+st.sidebar.markdown("""
+### Herramientas
 
-menu = st.sidebar.radio(
-    "Herramientas",
-    [
-        "Vista general",
-        "Sr vs Nd",
-        "REE",
-        "TAS",
-        "Clustering"
-    ]
-)
+- [Vista general](#top)
+- [Sr vs Nd](#srnd)
+- [REE](#ree)
+- [TAS](#tas)
+- [Clustering](#clustering)
+""", unsafe_allow_html=True)
+
 st.markdown("""
 <style>
     .stApp {
@@ -172,13 +170,39 @@ if "Rb" in df.columns:
 st.success("¡Excel cargado, limpio y listo para hacer ciencia!")
 st.dataframe(df.head(), use_container_width=True)
 
-# -------------------------
-# 1. Diagrama Sr vs Nd (Seaborn)
-# -------------------------
-st.subheader("Diagrama Sr vs Nd")
+# =========================================================
+# 1. Diagrama Sr vs Nd
+# =========================================================
+
+st.markdown("""
+<div id="srnd"></div>
+
+<div class="section-card">
+    <h2 style="
+        margin-top:0;
+        margin-bottom:0.4rem;
+        color:#0f172a;
+        font-size:1.6rem;
+        font-weight:800;
+    ">
+        Diagrama Sr vs Nd
+    </h2>
+
+    <p style="
+        color:#64748b;
+        font-size:0.95rem;
+        margin-bottom:1.2rem;
+    ">
+        Relaciones isotópicas entre Sr y Nd para interpretar
+        fuentes mantélicas y dominios geoquímicos.
+    </p>
+</div>
+""", unsafe_allow_html=True)
 
 if {'Sr87_Sr86', 'Nd143_Nd144', 'Location'}.issubset(df.columns):
+
     sns.set_theme(style="whitegrid")
+
     fig, ax = plt.subplots(figsize=(10, 6))
 
     sns.scatterplot(
@@ -192,13 +216,32 @@ if {'Sr87_Sr86', 'Nd143_Nd144', 'Location'}.issubset(df.columns):
         ax=ax
     )
 
-    ax.set_title("Sr vs Nd", fontsize=14, fontweight="bold")
-    ax.set_xlabel("87Sr / 86Sr", fontsize=12)
-    ax.set_ylabel("143Nd / 144Nd", fontsize=12)
-    ax.legend(bbox_to_anchor=(1.05, 1), loc="upper left")
+    ax.set_title(
+        "Sr vs Nd",
+        fontsize=15,
+        fontweight="bold"
+    )
+
+    ax.set_xlabel(
+        "87Sr / 86Sr",
+        fontsize=12
+    )
+
+    ax.set_ylabel(
+        "143Nd / 144Nd",
+        fontsize=12
+    )
+
+    ax.legend(
+        bbox_to_anchor=(1.02, 1),
+        loc="upper left",
+        frameon=True
+    )
 
     fig.tight_layout()
-    st.pyplot(fig)
+
+    st.pyplot(fig, use_container_width=True)
+
 else:
     st.warning("Faltan columnas para el diagrama Sr vs Nd.")
 
