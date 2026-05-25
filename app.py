@@ -603,7 +603,11 @@ if nombre_columna_localidad in df.columns and nombre_columna_muestra in df.colum
                 continue
 
             localidad = df_muestra[nombre_columna_localidad].iloc[0]
-            df_muestra['Elemento'] = pd.Categorical(df_muestra['Elemento'], categories=ree_disponibles, ordered=True)
+            df_muestra['Elemento'] = pd.Categorical(
+                df_muestra['Elemento'],
+                categories=ree_disponibles,
+                ordered=True
+            )
             df_muestra = df_muestra.sort_values('Elemento')
 
             fig.add_trace(go.Scatter(
@@ -639,15 +643,6 @@ if nombre_columna_localidad in df.columns and nombre_columna_muestra in df.colum
         morb_norm = [morb_ref[e] / condrito[e] for e in ree_disponibles]
 
         fig.add_trace(go.Scatter(
-            x=ree_disponibles,
-            y=oib_norm,
-            mode='lines+markers',
-            name='OIB (Referencia)',
-            line=dict(color='red', width=4, dash='dash'),
-            marker=dict(size=8, color='red', symbol='diamond')
-        ))
-
-               fig.add_trace(go.Scatter(
             x=ree_disponibles,
             y=oib_norm,
             mode='lines+markers',
@@ -716,6 +711,7 @@ if nombre_columna_localidad in df.columns and nombre_columna_muestra in df.colum
         st.warning("No hay elementos REE disponibles en el archivo.")
 else:
     st.warning("Faltan columnas necesarias para generar patrones REE.")
+
 # =========================================================
 # 6. TAS con % de Fusión
 # =========================================================
@@ -914,7 +910,6 @@ if {'SiO2', 'Na2O', 'K2O', 'La', 'Sample', 'Location'}.issubset(df.columns):
         fig.update_yaxes(showgrid=True, gridcolor='lightgray')
 
         st.plotly_chart(fig, use_container_width=True)
-
 
 # =========================================================
 # 8. TAS y Evolución Magmática
