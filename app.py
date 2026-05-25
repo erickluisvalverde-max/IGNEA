@@ -11,6 +11,25 @@ import plotly.graph_objects as go
 from PIL import Image
 from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import KMeans
+
+st.set_page_config(
+    page_title="Análisis Geoquímico de Galápagos",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
+
+st.sidebar.title("Panel Geoquímico")
+
+menu = st.sidebar.radio(
+    "Herramientas",
+    [
+        "Vista general",
+        "Sr vs Nd",
+        "REE",
+        "TAS",
+        "Clustering"
+    ]
+)
 st.markdown("""
 <style>
     .stApp {
@@ -118,7 +137,6 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-st.set_page_config(page_title="Análisis Geoquímico de Galápagos", layout="wide")
 
 st.markdown("""
 <div class="hero-box">
