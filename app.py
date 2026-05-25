@@ -647,7 +647,7 @@ if nombre_columna_localidad in df.columns and nombre_columna_muestra in df.colum
             marker=dict(size=8, color='red', symbol='diamond')
         ))
 
-        fig.add_trace(go.Scatter(
+       fig.add_trace(go.Scatter(
             x=ree_disponibles,
             y=morb_norm,
             mode='lines+markers',
