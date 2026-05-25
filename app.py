@@ -157,14 +157,37 @@ st.set_page_config(page_title="Análisis Geoquímico de Galápagos", layout="wid
 
 st.markdown("""
 <div class="hero-box">
-    <div class="mini-tag">Geoquímica · Visualización · Galápagos</div>
-    <h1 class="main-title">Análisis geoquímico de Galápagos</h1>
+
+    <div class="mini-tag">
+        Geoquímica · Petrología · Visualización Científica
+    </div>
+
+    <div class="main-title">
+        Análisis Geoquímico de Galápagos
+    </div>
+
     <p class="subtitle">
-        Plataforma interactiva para explorar relaciones isotópicas, clasificación TAS,
-        tierras raras, fusión parcial y dominios geoquímicos.
+        Plataforma interactiva para explorar relaciones isotópicas,
+        patrones de tierras raras, clasificación TAS,
+        procesos de fusión parcial y dominios geoquímicos.
     </p>
+
 </div>
 """, unsafe_allow_html=True)
+st.sidebar.title("Panel Geoquímico")
+
+st.sidebar.markdown("---")
+
+st.sidebar.markdown("""
+### Herramientas
+
+- Isótopos Sr-Nd
+- Diagramas TAS
+- Patrones REE
+- Fusión parcial
+- Clustering geoquímico
+- Visualización interactiva
+""")
 archivo = st.file_uploader("Sube tu archivo Excel", type=["xlsx", "xls"])
 
 if archivo is None:
