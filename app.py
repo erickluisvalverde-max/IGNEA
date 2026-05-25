@@ -454,74 +454,74 @@ if {'Sr87_Sr86', 'Nd143_Nd144', 'Location'}.issubset(df.columns):
     else:
         st.warning("No se encontró la imagen SRvsND.png.png.")
 
-# después de crear fig = px.line(...)
+# =========================================================
+# 4. La/Sm vs Sm/Yb
+# =========================================================
 
-# muestras: un poco más visibles pero sin tapar todo
-fig.update_traces(
-    line=dict(width=1),
-    opacity=0.6,
-    marker=dict(size=4)
-)
+st.markdown('<div id="ree"></div>', unsafe_allow_html=True)
 
-# recalcula referencias como ya tienes
-oib_norm = [oib_ref[e] / condrito[e] for e in ree_disponibles]
-morb_norm = [morb_ref[e] / condrito[e] for e in ree_disponibles]
+st.markdown("""
+<div class="section-card">
+    <h2 class="section-title">La/Sm vs Sm/Yb</h2>
+    <p class="section-text">
+        Variaciones geoquímicas de elementos de tierras raras
+        para interpretar enriquecimiento mantélico y profundidad de fusión.
+    </p>
+</div>
+""", unsafe_allow_html=True)
 
-# referencias destacadas
-fig.add_trace(go.Scatter(
-    x=ree_disponibles,
-    y=oib_norm,
-    mode='lines+markers',
-    name='OIB (Referencia)',
-    line=dict(color='red', width=5, dash='dash'),
-    marker=dict(size=9, color='red', symbol='diamond')
-))
+if {'La', 'Sm', 'Yb', 'Location', 'Sample'}.issubset(df.columns):
+    df_ree = df.dropna(subset=['La', 'Sm', 'Yb']).copy()
 
-fig.add_trace(go.Scatter(
-    x=ree_disponibles,
-    y=morb_norm,
-    mode='lines+markers',
-    name='N-MORB (Referencia)',
-    line=dict(color='blue', width=5, dash='dash'),
-    marker=dict(size=9, color='blue', symbol='square')
-))
+    if not df_ree.empty:
+        df_ree['La_Sm'] = df_ree['La'] / df_ree['Sm']
+        df_ree['Sm_Yb'] = df_ree['Sm'] / df_ree['Yb']
 
-fig.update_layout(
-    height=600,
-    paper_bgcolor='white',
-    plot_bgcolor='white',
-    hovermode='closest',
-    font=dict(
-        family='Segoe UI',
-        size=15,
-        color='black'
-    ),
-    title_font=dict(size=20, color='black'),
-    legend=dict(
-        title='Location',
-        bgcolor='white',
-        bordercolor='lightgray',
-        borderwidth=1,
-        font=dict(color='black', size=13),
-        title_font=dict(color='black', size=14)
-    ),
-    xaxis_title='Elementos de Tierras Raras (LREE -> HREE)',
-    yaxis_title='Muestra / Condrito'
-)
+        fig = px.scatter(
+            df_ree,
+            x='Sm_Yb',
+            y='La_Sm',
+            color='Location',
+            hover_name='Sample',
+            title='',
+            labels={
+                'Sm_Yb': 'Sm / Yb',
+                'La_Sm': 'La / Sm',
+                'Location': 'Isla'
+            },
+            template='plotly_white'
+        )
 
-fig.update_xaxes(
-    showgrid=False,
-    zeroline=False,
-    tickfont=dict(size=13, color='black'),
-    title_font=dict(size=15, color='black')
-)
+        fig.update_traces(
+            marker=dict(
+                size=13,
+                line=dict(width=1, color='black'),
+                opacity=0.92
+            ),
+            selector=dict(mode='markers')
+        )
 
-fig.update_yaxes(
-    showgrid=False,
-    zeroline=False,
-    tickfont=dict(size=13, color='black'),
-    title_font=dict(size=15, color='black')
-)
+        fig.update_layout(
+            height=620,
+            paper_bgcolor='rgba(0,0,0,0)',
+            plot_bgcolor='white',
+            font=dict(family='Segoe UI', size=13, color='#0f172a'),
+            legend=dict(
+                title='Localidad',
+                bgcolor='rgba(255,255,255,0.85)',
+                bordercolor='#cbd5e1',
+                borderwidth=1
+            ),
+            margin=dict(l=40, r=40, t=30, b=40)
+        )
+
+        fig.update_xaxes(showgrid=True, gridcolor='rgba(148,163,184,0.25)', zeroline=False)
+        fig.update_yaxes(showgrid=True, gridcolor='rgba(148,163,184,0.25)', zeroline=False)
+
+        st.plotly_chart(fig, use_container_width=True)
+else:
+    st.warning("Faltan columnas necesarias para el diagrama La/Sm vs Sm/Yb.")
+
 # =========================================================
 # 5. Patrones REE OIB y MORB
 # =========================================================
